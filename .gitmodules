@@ -1,0 +1,15 @@
+[submodule "BitMagic.X16Compiler"]
+	path = BitMagic.X16Compiler
+	url = https://github.com/Yazwh0/BitMagic.X16Compiler.git
+[submodule "BitMagic.VSC"]
+	path = BitMagic.VSC
+	url = https://github.com/Yazwh0/BitMagic.VSC.git
+[submodule "BitMagic.Libraries"]
+	path = BitMagic.Libraries
+	url = https://github.com/Yazwh0/BitMagic.Libraries.git
+[submodule "BitMagic.X16Emulator"]
+	path = BitMagic.X16Emulator
+	url = https://github.com/Yazwh0/BitMagic.X16Emulator.git
+[submodule "External/DiscUtils"]
+	path = External/DiscUtils
+	url = https://github.com/Yazwh0/DiscUtils.git

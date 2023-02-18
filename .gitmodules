@@ -13,3 +13,6 @@
 [submodule "External/DiscUtils"]
 	path = External/DiscUtils
 	url = https://github.com/Yazwh0/DiscUtils.git
+[submodule "BitMagic.X16Debugger"]
+	path = BitMagic.X16Debugger
+	url = https://github.com/Yazwh0/BitMagic.X16Debugger.git

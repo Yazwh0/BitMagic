@@ -3,22 +3,22 @@ name: CI
 on:
   push:
     branches: ["main"]
-  workflow_dispatch:
+    workflow_dispatch:
 
   jobs:
     build:
       runs-on: windows-2019
 
-    strategy:
-      matrix:
-        configuration: [Release, Debug]
-        platform: [x64]
+      strategy:
+        matrix:
+          configuration: [Release, Debug]
+          platform: [x64]
 
-    steps:
-      - uses: actions/checkout@v3
+      steps:
+        - uses: actions/checkout@v3
 
-      - name: Setup MSBuild.exe
-        uses: microsoft/setup-msbuild@v1.0.3
+        - name: Setup MSBuild.exe
+          uses: microsoft/setup-msbuild@v1.0.3
 
-      - name: Build Emulator Core
-        run: msbuild 'BitMagic.X16Emulator/X16Emulator/EmulatorCore/EmulatorCore.vcxproj' /p:configuration=${{ matrix.configuration }} /p:platform=${{ matrix.platform }}
+        - name: Build Emulator Core
+          run: msbuild 'BitMagic.X16Emulator/X16Emulator/EmulatorCore/EmulatorCore.vcxproj' /p:configuration=${{ matrix.configuration }} /p:platform=${{ matrix.platform }}

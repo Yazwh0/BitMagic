@@ -25,7 +25,7 @@ jobs:
         run: dotnet build 'BitMagic.X16Debugger/X16D/X16D.csproj' /p:configuration=Release --nologo
 
       - name: Copy Core to Debugger
-        run : copy BitMagic.X16Emulator/X16Emulator/EmulatorCore/x64/Release/EmulatorCore.dll BitMagic.X16Debugger/X16D/bin/Release/net6.0/EmulatoreCore/EmulatorCore.dll
+        run : copy-item 'BitMagic.X16Emulator/X16Emulator/EmulatorCore/x64/Release/EmulatorCore.dll' -Destination 'BitMagic.X16Debugger/X16D/bin/Release/net6.0/EmulatoreCore'
 
       - name: Save Debugger Artifacts
         uses: actions/upload-artifact@v3
@@ -37,7 +37,7 @@ jobs:
         run: dotnet build 'BitMagic.X16Emulator/X16E/X16E.csproj' /p:configuration=Release --nologo
 
       - name: Copy Core to Emulator
-        run: copy BitMagic.X16Emulator/X16Emulator/EmulatorCore/x64/Release/EmulatorCore.dll BitMagic.X16Emulator/X16E/bin/Release/net6.0/EmulatoreCore/EmulatorCore.dll
+        run: copy-item 'BitMagic.X16Emulator/X16Emulator/EmulatorCore/x64/Release/EmulatorCore.dll' -Destination 'BitMagic.X16Emulator/X16E/bin/Release/net6.0/EmulatoreCore'
 
       - name: Save Emulator Artifacts
         uses: actions/upload-artifact@v3

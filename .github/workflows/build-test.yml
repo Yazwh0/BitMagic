@@ -25,3 +25,9 @@ jobs:
 
       - name: Build Emulator Core
         run: msbuild 'BitMagic.X16Emulator/X16Emulator/EmulatorCore/EmulatorCore.vcxproj' /p:configuration=${{ matrix.configuration }} /p:platform=${{ matrix.platform }}
+
+      - name: Build Debugger
+        run: dotnet build 'BitMagic.X16Debugger/BitMagic.X16Debugger.sln' /p:configuration=${{ matrix.configuration }}
+
+      - name: Build Emulator
+        run: dotnet build 'BitMagic.X16Emulator/BitMagic.X16Emulator.sln' /p:configuration=${{ matrix.configuration }}        

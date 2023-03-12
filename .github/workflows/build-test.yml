@@ -11,7 +11,7 @@ jobs:
 
     strategy:
       matrix:
-        configuration: [Release, Debug]
+        configuration: [Release]
         platform: [x64]
 
     steps:
@@ -29,5 +29,17 @@ jobs:
       - name: Build Debugger
         run: dotnet build 'BitMagic.X16Debugger/BitMagic.X16Debugger.sln' /p:configuration=${{ matrix.configuration }}
 
+      - name: Save Debugger Artifacts
+        uses: actions/upload-artifact@v3
+        with: 
+          name: Debugger
+          path: BitMagic.X16Debugger/X16D/bin/Release/net6.0/*
+
       - name: Build Emulator
         run: dotnet build 'BitMagic.X16Emulator/BitMagic.X16Emulator.sln' /p:configuration=${{ matrix.configuration }}        
+
+      - name: Save Emulator Artifacts
+        uses: actions/upload-artifact@v3
+        with: 
+          name: Emulator
+          path: BitMagic.X16Emulator/X16E/bin/Release/net6.0/*

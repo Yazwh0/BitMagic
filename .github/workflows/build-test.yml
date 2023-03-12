@@ -9,11 +9,6 @@ jobs:
   build:
     runs-on: windows-2022
 
-    strategy:
-      matrix:
-        configuration: [Release]
-        platform: [x64]
-
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -24,22 +19,22 @@ jobs:
         uses: microsoft/setup-msbuild@v1.3.1
 
       - name: Build Emulator Core
-        run: msbuild 'BitMagic.X16Emulator/X16Emulator/EmulatorCore/EmulatorCore.vcxproj' /p:configuration=${{ matrix.configuration }} /p:platform=${{ matrix.platform }}
+        run: msbuild 'BitMagic.X16Emulator/X16Emulator/EmulatorCore/EmulatorCore.vcxproj' /p:configuration=Release /p:platform=x64
 
       - name: Build Debugger
-        run: dotnet build 'BitMagic.X16Debugger/X16D/X16D.csproj' /p:configuration=${{ matrix.configuration }}
+        run: dotnet build 'BitMagic.X16Debugger/X16D/X16D.csproj' /p:configuration=Release --nologo
 
       - name: Save Debugger Artifacts
         uses: actions/upload-artifact@v3
         with: 
-          name: Debugger
+          name: BitMagic-TheDebugger
           path: BitMagic.X16Debugger/X16D/bin/Release/net6.0/*
 
       - name: Build Emulator
-        run: dotnet build 'BitMagic.X16Emulator/X16E/X16E.csproj' /p:configuration=${{ matrix.configuration }}        
+        run: dotnet build 'BitMagic.X16Emulator/X16E/X16E.csproj' /p:configuration=Release --nologo
 
       - name: Save Emulator Artifacts
         uses: actions/upload-artifact@v3
         with: 
-          name: Emulator
+          name: BitMagic-TheEmulator
           path: BitMagic.X16Emulator/X16E/bin/Release/net6.0/*

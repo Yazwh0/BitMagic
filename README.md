@@ -1,2 +1,2 @@
 # BitMagic
-Repository that brings in other submodules for a complete envrionment
+Repository that brings in other submodules for a complete environment

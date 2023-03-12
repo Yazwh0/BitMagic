@@ -16,3 +16,6 @@
 [submodule "BitMagic.X16Debugger"]
 	path = BitMagic.X16Debugger
 	url = https://github.com/Yazwh0/BitMagic.X16Debugger.git
+[submodule "BitMagic.Documentation"]
+	path = BitMagic.Documentation
+	url = https://github.com/Yazwh0/BitMagic.Documentation.git

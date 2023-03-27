@@ -72,5 +72,5 @@ jobs:
           automatic_release_tag: "latest"
           title: "Development Build"
           files: |
-            BitMagic-TheEmulator.zip
-            BitMagic-TheDebugger.zip
+            BitMagic.X16Emulator/X16E/bin/Release/net6.0/BitMagic-TheEmulator.zip
+            BitMagic.X16Debugger/X16D/bin/Release/net6.0/BitMagic-TheDebugger.zip

@@ -62,7 +62,7 @@ jobs:
         with:
           type: 'zip'
           filename: 'BitMagic-TheEmulator.zip'
-          directory: BitMagic.X16Emulator/X16E/bin/Release/net6.0/
+          directory: BitMagic.X16Emulator/X16E/bin/Release/net6.0/*
 
       - name: Create Github Release
         uses: "marvinpinto/action-automatic-releases@latest"

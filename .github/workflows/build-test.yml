@@ -40,7 +40,7 @@ jobs:
         with:
           type: 'zip'
           filename: 'BitMagic-TheDebugger.zip'
-          path: BitMagic.X16Debugger/X16D/bin/Release/net6.0/*
+          directory: BitMagic.X16Debugger/X16D/bin/Release/net6.0
   
       - name: Build Emulator
         run: dotnet build 'BitMagic.X16Emulator/X16E/X16E.csproj' /p:configuration=Release --nologo
@@ -54,7 +54,7 @@ jobs:
       - name: Save Emulator Artifacts
         uses: actions/upload-artifact@v3
         with: 
-          name: BitMagic-TheEmulator.zip
+          name: BitMagic-TheEmulator
           path: BitMagic.X16Emulator/X16E/bin/Release/net6.0/*
 
       - name: Archive Emulator
@@ -62,7 +62,7 @@ jobs:
         with:
           type: 'zip'
           filename: 'BitMagic-TheEmulator.zip'
-          directory: BitMagic.X16Emulator/X16E/bin/Release/net6.0/*
+          directory: BitMagic.X16Emulator/X16E/bin/Release/net6.0
 
       - name: Create Github Release
         uses: "marvinpinto/action-automatic-releases@latest"

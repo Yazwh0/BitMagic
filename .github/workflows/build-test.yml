@@ -3,8 +3,7 @@ name: Build
 on:
   push:
     branches: ["main"]
-    workflow_dispatch:
-
+    
 jobs:
   build:
     runs-on: windows-2022
@@ -36,6 +35,13 @@ jobs:
           name: BitMagic-TheDebugger
           path: BitMagic.X16Debugger/X16D/bin/Release/net6.0/*
 
+      - name: Archive Debugger
+        uses: thedoctor0/zip-release@0.7.1
+        with:
+          type: 'zip'
+          filename: 'BitMagic-TheDebugger.zip'
+          path: BitMagic.X16Debugger/X16D/bin/Release/net6.0/*
+  
       - name: Build Emulator
         run: dotnet build 'BitMagic.X16Emulator/X16E/X16E.csproj' /p:configuration=Release --nologo
 
@@ -48,20 +54,27 @@ jobs:
       - name: Save Emulator Artifacts
         uses: actions/upload-artifact@v3
         with: 
-          name: BitMagic-TheEmulator
+          name: BitMagic-TheEmulator.zip
           path: BitMagic.X16Emulator/X16E/bin/Release/net6.0/*
 
-      - name: Generate release tag
+      - name: Archive Emulator
+        uses: thedoctor0/zip-release@0.7.1
+        with:
+          type: 'zip'
+          filename: 'BitMagic-TheEmulator.zip'
+          directory: BitMagic.X16Emulator/X16E/bin/Release/net6.0/
+
+      - name: Generate Release Tag
         id: generate_release_tag
         uses: amitsingh-007/next-release-tag@v3.0.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           tag_prefix: 'v'
-  
-      - name: Create Release
-        uses: actions/create-release@v1
-        env:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: "marvinpinto/action-automatic-releases@latest"
         with:
-          tag_name: ${{ steps.generate_release_tag.outputs.release_tag }}
-          release_name: Release ${{ steps.generate_release_tag.outputs.release_tag }}
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          prerelease: true
+          files: |
+            BitMagic-TheEmulator.zip
+            BitMagic-TheDebugger.zip

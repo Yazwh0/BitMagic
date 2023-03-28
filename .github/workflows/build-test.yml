@@ -65,7 +65,7 @@ jobs:
           directory: BitMagic.X16Emulator/X16E/bin/Release/net6.0
 
       - name: Create Version File
-        run: echo "$GITHUB_SHA" > version.txt
+        run: echo "${{ github.sha }}" > version.txt
 
       - name: Create Github Release
         uses: "marvinpinto/action-automatic-releases@latest"

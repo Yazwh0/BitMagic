@@ -64,6 +64,9 @@ jobs:
           filename: 'BitMagic-TheEmulator.zip'
           directory: BitMagic.X16Emulator/X16E/bin/Release/net6.0
 
+      - name: Create Version File
+        run: echo "$GITHUB_SHA" > version.txt
+
       - name: Create Github Release
         uses: "marvinpinto/action-automatic-releases@latest"
         with:
@@ -74,3 +77,4 @@ jobs:
           files: |
             BitMagic.X16Emulator/X16E/bin/Release/net6.0/BitMagic-TheEmulator.zip
             BitMagic.X16Debugger/X16D/bin/Release/net6.0/BitMagic-TheDebugger.zip
+            version.txt

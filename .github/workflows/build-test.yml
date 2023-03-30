@@ -44,17 +44,18 @@ jobs:
           echo "${{ github.sha }}" > BitMagic.X16Debugger/X16D/bin/Release/net6.0/version.txt
           echo "${{ github.sha }}" > version.txt
 
-      - name: Save Emulator Artifacts
-        uses: actions/upload-artifact@v3
-        with: 
-          name: BitMagic-TheEmulator
-          path: BitMagic.X16Emulator/X16E/bin/Release/net6.0/*
+      # We dont need artifacts, but left this here just in case.
+      # - name: Save Emulator Artifacts
+      #   uses: actions/upload-artifact@v3
+      #   with: 
+      #     name: BitMagic-TheEmulator
+      #     path: BitMagic.X16Emulator/X16E/bin/Release/net6.0/*
 
-      - name: Save Debugger Artifacts
-        uses: actions/upload-artifact@v3
-        with: 
-          name: BitMagic-TheDebugger
-          path: BitMagic.X16Debugger/X16D/bin/Release/net6.0/*
+      # - name: Save Debugger Artifacts
+      #   uses: actions/upload-artifact@v3
+      #   with: 
+      #     name: BitMagic-TheDebugger
+      #     path: BitMagic.X16Debugger/X16D/bin/Release/net6.0/*
   
       - name: Archive Emulator
         uses: thedoctor0/zip-release@0.7.1

@@ -44,13 +44,6 @@ jobs:
           echo "${{ github.sha }}" > BitMagic.X16Debugger/X16D/bin/Release/net6.0/version.txt
           echo "${{ github.sha }}" > version.txt
 
-      - name: Setup VS Dev
-        uses: seanmiddleditch/gha-setup-vsdevenv@v4
-
-      - name: Build MSI
-        working-directory: BitMagic.X16Emulator
-        run: devenv.com BitMagic.X16Emulator.sln /project X16ESetup\X16ESetup.vdproj /build "Release|x64"
-
       # We dont need artifacts, but left this here just in case.
       # - name: Save Emulator Artifacts
       #   uses: actions/upload-artifact@v3
@@ -78,6 +71,13 @@ jobs:
           filename: 'BitMagic-TheDebugger.zip'
           directory: BitMagic.X16Debugger/X16D/bin/Release/net6.0    
 
+      - name: Setup VS Dev
+        uses: seanmiddleditch/gha-setup-vsdevenv@v4
+
+      - name: Build MSI
+        working-directory: BitMagic.X16Emulator
+        run: devenv.com BitMagic.X16Emulator.sln /project X16ESetup\X16ESetup.vdproj /build "Release|x64"
+
       - name: Create Github Release
         uses: "marvinpinto/action-automatic-releases@latest"
         with:
@@ -88,5 +88,5 @@ jobs:
           files: |
             BitMagic.X16Emulator/X16E/bin/Release/net6.0/BitMagic-TheEmulator.zip
             BitMagic.X16Debugger/X16D/bin/Release/net6.0/BitMagic-TheDebugger.zip
-            BitMagic.X16Emulator/X16ESetup/Release/X16Setup.msi
+            BitMagic.X16Emulator/X16ESetup/Release/X16ESetup.msi
             version.txt

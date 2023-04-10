@@ -48,7 +48,8 @@ jobs:
         uses: seanmiddleditch/gha-setup-vsdevenv@v4
 
       - name: Build MSI
-        run: devenv.com BitMagic.X16Emulator\BitMagic.X16Emulator.sln /project BitMagic.X16Emulator\X16ESetup\X16ESetup.vdproj /build "Release|x64"
+        working-directory: BitMagic.X16Emulator
+        run: devenv.com BitMagic.X16Emulator.sln /project X16ESetup\X16ESetup.vdproj /build "Release|x64"
 
       # We dont need artifacts, but left this here just in case.
       # - name: Save Emulator Artifacts

@@ -48,7 +48,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with: 
           name: EmulatorCore
-          path: BitMagic.X16Emulator\X16Emulator\EmulatorCore\x64\Release\EmulatorCore.dll\core.obj
+          path: BitMagic.X16Emulator\X16Emulator\EmulatorCore\x64\Release\core.obj
 
       # We dont need artifacts, but left this here just in case.
       # - name: Save Emulator Artifacts

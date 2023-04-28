@@ -1,0 +1,79 @@
+name: Build-Linux
+
+on:
+  workflow_run:
+    workflows: [Build-Windows]
+    types: [completed]
+      
+jobs:
+  on-success:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Copy artifacts
+        uses: actions/download-artifact@v3
+        with:
+            name: EmulatorCore
+            path: BitMagic.X16Emulator/X16Emulator/EmulatoreCoreLinux/.
+
+      - name: Build Core Wrapper
+        working-directory: BitMagic.X16Emulator/X16Emulator/EmulatoreCoreLinux
+        run: ./build.sh
+
+      - name: Build Debugger
+        run: dotnet build 'BitMagic.X16Debugger/X16D/X16D.csproj' /p:configuration=Release --nologo
+
+      - name: Make Debugger Folder
+        run: mkdir BitMagic.X16Debugger\X16D\bin\Release\net6.0\EmulatorCore
+
+      - name: Copy Core to Debugger
+        run : copy-item 'BitMagic.X16Emulator\X16Emulator\EmulatorCoreLinux\EmulatorCore.so' -Destination 'BitMagic.X16Debugger\X16D\bin\Release\net6.0\EmulatorCore\EmulatorCore.so'
+   
+      - name: Create Version File
+        run: |
+          echo "${{ github.sha }}" > BitMagic.X16Debugger/X16D/bin/Release/net6.0/version.txt
+          echo "${{ github.sha }}" > version.txt
+
+      - name: Archive Debugger
+        uses: thedoctor0/zip-release@0.7.1
+        with:
+          type: 'zip'
+          filename: 'BitMagic-TheDebugger.Linux.zip'
+          directory: BitMagic.X16Debugger/X16D/bin/Release/net6.0
+
+      - name: Copy artifacts
+        uses: actions/download-artifact@v3
+        with:
+            name: EmulatoX16ESetup.msirCore
+            path: .
+              
+      - name: Copy artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: net6.0/BitMagic-TheDebugger.Windows.zip
+          path: .
+          
+      - name: Copy artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: BitMagic-TheEmulator.Windows.zip
+          path: .
+
+      - name: Create Github Release
+        uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          prerelease: true
+          automatic_release_tag: "latest"
+          title: "Development Build"
+          files: |
+            BitMagic.X16Debugger/X16D/bin/Release/net6.0/BitMagic-TheDebugger.Linux.zip
+            BitMagic-TheEmulator.Windows.zip
+            BitMagic-TheDebugger.Windows.zip
+            X16ESetup.msi
+            version.txt

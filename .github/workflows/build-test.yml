@@ -100,7 +100,9 @@ jobs:
 
       - name: Build Core Wrapper
         working-directory: BitMagic.X16Emulator/X16Emulator/EmulatorCoreLinux
-        run: ./build.sh
+        run: |
+          chmod +x build.sh
+          ./build.sh
 
       - name: Build Debugger
         run: dotnet build 'BitMagic.X16Debugger/X16D/X16D.csproj' /p:configuration=Release --nologo

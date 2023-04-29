@@ -95,14 +95,15 @@ jobs:
       - name: Copy artifacts
         uses: actions/download-artifact@v3
         with:
-            name: EmulatorCore
-            path: BitMagic.X16Emulator/X16Emulator/EmulatorCoreLinux
+          name: EmulatorCore
+          path: BitMagic.X16Emulator/X16Emulator/EmulatorCoreLinux
 
       - name: Build Core Wrapper
         working-directory: BitMagic.X16Emulator/X16Emulator/EmulatorCoreLinux
         run: |
           chmod +x build.sh
           ./build.sh
+          ls -l
 
       - name: Build Debugger
         run: dotnet build 'BitMagic.X16Debugger/X16D/X16D.csproj' /p:configuration=Release --nologo

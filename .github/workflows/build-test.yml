@@ -70,6 +70,12 @@ jobs:
         working-directory: BitMagic.X16Emulator
         run: devenv.com BitMagic.X16Emulator.sln /project X16ESetup\X16ESetup.vdproj /build "Release|x64"
 
+      - name: Save Emulator Setup Artifacts
+        uses: actions/upload-artifact@v3
+        with: 
+          name: BitMagic-Setup
+          path: BitMagic.X16Emulator\X16ESetup\Release\X16ESetup.msi
+
       - name: Save Emulator Artifacts
         uses: actions/upload-artifact@v3
         with: 
@@ -109,7 +115,7 @@ jobs:
           chmod +x build.sh
           ./build.sh
           ls -l
-          
+
       - name: Copy Wrapper
         run: |
           cp BitMagic.X16Emulator/X16Emulator/EmulatorCoreLinux/EmulatorCore.so BitMagic.X16Debugger/X16D/bin/Release/net6.0/EmulatorCore/.
@@ -122,23 +128,23 @@ jobs:
       - name: Archive Debugger
         uses: thedoctor0/zip-release@0.7.1
         with:
-          type: 'zip'
-          filename: 'BitMagic-TheDebugger.Linux.zip'
+          type: 'tar'
+          filename: 'BitMagic-TheDebugger.Linux.tar.gz'
           directory: BitMagic.X16Debugger/X16D/bin/Release/net6.0
 
-      - name: Copy artifacts
+      - name: Copy artifacts (Setup)
         uses: actions/download-artifact@v3
         with:
-            name: EmulatoX16ESetup.msirCore
-            path: .
+          name: BitMagic-Setup
+          path: .
               
-      - name: Copy artifacts
+      - name: Copy artifacts (Debugger)
         uses: actions/download-artifact@v3
         with:
           name: net6.0/BitMagic-TheDebugger.Windows.zip
           path: .
           
-      - name: Copy artifacts
+      - name: Copy artifacts (Emulator)
         uses: actions/download-artifact@v3
         with:
           name: BitMagic-TheEmulator.Windows.zip
@@ -152,7 +158,7 @@ jobs:
           automatic_release_tag: "latest"
           title: "Development Build"
           files: |
-            BitMagic.X16Debugger/X16D/bin/Release/net6.0/BitMagic-TheDebugger.Linux.zip
+            BitMagic.X16Debugger/X16D/bin/Release/net6.0/BitMagic-TheDebugger.Linux.tar.gz
             BitMagic-TheEmulator.Windows.zip
             BitMagic-TheDebugger.Windows.zip
             X16ESetup.msi

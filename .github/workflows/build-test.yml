@@ -108,10 +108,10 @@ jobs:
         run: dotnet build 'BitMagic.X16Debugger/X16D/X16D.csproj' /p:configuration=Release --nologo
 
       - name: Make Debugger Folder
-        run: mkdir BitMagic.X16Debugger\X16D\bin\Release\net6.0\EmulatorCore
+        run: mkdir BitMagic.X16Debugger/X16D/bin/Release/net6.0/EmulatorCore
 
       - name: Copy Core to Debugger
-        run : copy-item 'BitMagic.X16Emulator\X16Emulator\EmulatorCoreLinux\EmulatorCore.so' -Destination 'BitMagic.X16Debugger\X16D\bin\Release\net6.0\EmulatorCore\EmulatorCore.so'
+        run : copy-item 'BitMagic.X16Emulator/X16Emulator/EmulatorCoreLinux/EmulatorCore.so' -Destination 'BitMagic.X16Debugger/X16D/bin/Release/net6.0/EmulatorCore/EmulatorCore.so'
    
       - name: Create Version File
         run: |

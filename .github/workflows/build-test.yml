@@ -141,13 +141,13 @@ jobs:
       - name: Copy artifacts (Debugger)
         uses: actions/download-artifact@v3
         with:
-          name: net6.0/BitMagic-TheDebugger.Windows.zip
+          name: net6.0/BitMagic-TheDebugger
           path: .
           
       - name: Copy artifacts (Emulator)
         uses: actions/download-artifact@v3
         with:
-          name: BitMagic-TheEmulator.Windows.zip
+          name: BitMagic-TheEmulator
           path: .
 
       - name: Create Github Release

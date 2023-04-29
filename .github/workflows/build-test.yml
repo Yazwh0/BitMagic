@@ -141,7 +141,7 @@ jobs:
       - name: Copy artifacts (Debugger)
         uses: actions/download-artifact@v3
         with:
-          name: net6.0/BitMagic-TheDebugger
+          name: BitMagic-TheDebugger
           path: .
           
       - name: Copy artifacts (Emulator)

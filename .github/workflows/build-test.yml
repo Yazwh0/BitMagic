@@ -96,10 +96,10 @@ jobs:
         uses: actions/download-artifact@v3
         with:
             name: EmulatorCore
-            path: BitMagic.X16Emulator/X16Emulator/EmulatoreCoreLinux
+            path: BitMagic.X16Emulator/X16Emulator/EmulatorCoreLinux
 
       - name: Build Core Wrapper
-        working-directory: BitMagic.X16Emulator/X16Emulator/EmulatoreCoreLinux
+        working-directory: BitMagic.X16Emulator/X16Emulator/EmulatorCoreLinux
         run: ./build.sh
 
       - name: Build Debugger

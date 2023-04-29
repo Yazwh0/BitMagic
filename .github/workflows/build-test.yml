@@ -109,7 +109,10 @@ jobs:
           chmod +x build.sh
           ./build.sh
           ls -l
-          cp EmulatorCore.so BitMagic.X16Debugger/X16D/bin/Release/net6.0/EmulatorCore/EmulatorCore.so
+          
+      - name: Copy Wrapper
+        run: |
+          cp BitMagic.X16Emulator/X16Emulator/EmulatorCoreLinux/EmulatorCore.so BitMagic.X16Debugger/X16D/bin/Release/net6.0/EmulatorCore/.
    
       - name: Create Version File
         run: |

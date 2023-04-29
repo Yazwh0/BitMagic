@@ -97,6 +97,11 @@ jobs:
         with:
           name: EmulatorCore
           path: BitMagic.X16Emulator/X16Emulator/EmulatorCoreLinux
+      - name: Build Debugger
+        run: dotnet build 'BitMagic.X16Debugger/X16D/X16D.csproj' /p:configuration=Release --nologo
+  
+      - name: Make Debugger Folder
+        run: mkdir BitMagic.X16Debugger/X16D/bin/Release/net6.0/EmulatorCore
 
       - name: Build Core Wrapper
         working-directory: BitMagic.X16Emulator/X16Emulator/EmulatorCoreLinux
@@ -104,15 +109,7 @@ jobs:
           chmod +x build.sh
           ./build.sh
           ls -l
-
-      - name: Build Debugger
-        run: dotnet build 'BitMagic.X16Debugger/X16D/X16D.csproj' /p:configuration=Release --nologo
-
-      - name: Make Debugger Folder
-        run: mkdir BitMagic.X16Debugger/X16D/bin/Release/net6.0/EmulatorCore
-
-      - name: Copy Core to Debugger
-        run : copy-item 'BitMagic.X16Emulator/X16Emulator/EmulatorCoreLinux/EmulatorCore.so' -Destination 'BitMagic.X16Debugger/X16D/bin/Release/net6.0/EmulatorCore/EmulatorCore.so'
+          cp EmulatorCore.so BitMagic.X16Debugger/X16D/bin/Release/net6.0/EmulatorCore/EmulatorCore.so
    
       - name: Create Version File
         run: |

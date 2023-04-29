@@ -129,8 +129,8 @@ jobs:
         uses: thedoctor0/zip-release@0.7.1
         with:
           type: 'tar'
-          filename: 'BitMagic-TheDebugger.Linux.tar.gz'
-          path: BitMagic.X16Debugger/X16D/bin/Release/net6.0
+          filename: '../../../../BitMagic-TheDebugger.Linux.tar.gz'
+          directory: BitMagic.X16Debugger/X16D/bin/Release/net6.0
 
       - name: Copy artifacts (Setup)
         uses: actions/download-artifact@v3

@@ -15,6 +15,8 @@ Please note, this is not an 'official' application that is endorsed by the Comma
 
 It is also a work in progress, for development you may find the [Official Emulator](https://github.com/X16Community/x16-emulator) or [Box16](https://github.com/indigodarkwolf/box16) a better choice.
 
+You will need to obtain a R43 (or later) [Rom](https://github.com/Yazwh0/BitMagic.Documentation/blob/main/Rom.md).
+
 For more info on anything X16, you can join the [Discord server](https://discord.gg/nS2PqEC).
 
 ## Cloning

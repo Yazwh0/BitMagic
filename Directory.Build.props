@@ -1,0 +1,15 @@
+<Project>
+  <PropertyGroup>
+    <id>BitMagic</id>
+    <version>0.0.1-alpha</version>
+    <title>BitMagic X16 Emulator and Debugger</title>
+    <authors>Yazwh0</authors>
+    <owners>Yazwh0</owners>
+    <license>AGPL-3.0-or-later</license>
+    <description>X16 Emulator and Debugger</description>
+    <icon>NugetProject\butterfly.jpg</icon>
+    <dependencies>
+      <group targetFramework="net6.0" />
+    </dependencies>
+  </PropertyGroup>
+</Project>

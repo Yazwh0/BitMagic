@@ -23,20 +23,14 @@ jobs:
       - name: Build Debugger
         run: dotnet build 'BitMagic.X16Debugger/X16D/X16D.csproj' /p:configuration=Release --nologo
 
-      - name: Make Debugger Folder
-        run: mkdir BitMagic.X16Debugger\X16D\bin\Release\net6.0\EmulatorCore
-
       - name: Copy Core to Debugger
-        run : copy-item 'BitMagic.X16Emulator\X16Emulator\EmulatorCore\x64\Release\EmulatorCore.dll' -Destination 'BitMagic.X16Debugger\X16D\bin\Release\net6.0\EmulatorCore\EmulatorCore.dll'
+        run : copy-item 'BitMagic.X16Emulator\X16Emulator\EmulatorCore\x64\Release\EmulatorCore.dll' -Destination 'BitMagic.X16Debugger\X16D\bin\Release\net6.0\EmulatorCore.dll'
 
       - name: Build Emulator
         run: dotnet build 'BitMagic.X16Emulator/X16E/X16E.csproj' /p:configuration=Release --nologo
 
-      - name: Make Emulator Folder
-        run: mkdir BitMagic.X16Emulator\X16E\bin\Release\net6.0\EmulatorCore
-
       - name: Copy Core to Emulator
-        run: copy-item 'BitMagic.X16Emulator\X16Emulator\EmulatorCore\x64\Release\EmulatorCore.dll' -Destination 'BitMagic.X16Emulator\X16E\bin\Release\net6.0\EmulatorCore\EmulatorCore.dll'
+        run: copy-item 'BitMagic.X16Emulator\X16Emulator\EmulatorCore\x64\Release\EmulatorCore.dll' -Destination 'BitMagic.X16Emulator\X16E\bin\Release\net6.0\EmulatorCore.dll'
 
       - name: Create Version File
         run: |
@@ -107,9 +101,6 @@ jobs:
       - name: Build Debugger
         run: dotnet build 'BitMagic.X16Debugger/X16D/X16D.csproj' /p:configuration=Release --nologo
   
-      - name: Make Debugger Folder
-        run: mkdir BitMagic.X16Debugger/X16D/bin/Release/net6.0/EmulatorCore
-
       - name: Build Core Wrapper
         working-directory: BitMagic.X16Emulator/X16Emulator/EmulatorCoreLinux
         run: |
@@ -119,7 +110,7 @@ jobs:
 
       - name: Copy Wrapper
         run: |
-          cp BitMagic.X16Emulator/X16Emulator/EmulatorCoreLinux/EmulatorCore.so BitMagic.X16Debugger/X16D/bin/Release/net6.0/EmulatorCore/.
+          cp BitMagic.X16Emulator/X16Emulator/EmulatorCoreLinux/EmulatorCore.so BitMagic.X16Debugger/X16D/bin/Release/net6.0/.
    
       - name: Create Version File
         run: |

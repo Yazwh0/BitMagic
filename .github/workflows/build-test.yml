@@ -107,6 +107,7 @@ jobs:
 
       - name: Copy Wrapper to Emulator
         run: |
+          mkdir BitMagic.X16Emulator/X16Emulator/EmulatorCore/x64/Release
           cp BitMagic.X16Emulator/X16Emulator/EmulatorCoreLinux/EmulatorCore.so BitMagic.X16Emulator/X16Emulator/EmulatorCore/x64/Release/.
   
       - name: Build Debugger

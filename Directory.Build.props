@@ -1,7 +1,7 @@
 <Project>
   <PropertyGroup>
     <id>BitMagic</id>
-    <version>0.0.1-alpha</version>
+    <version>0.0.7-alpha</version>
     <title>BitMagic X16 Emulator and Debugger</title>
     <authors>Yazwh0</authors>
     <owners>Yazwh0</owners>
@@ -11,5 +11,6 @@
     <dependencies>
       <group targetFramework="net6.0" />
     </dependencies>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
   </PropertyGroup>
 </Project>

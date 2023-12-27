@@ -1,7 +1,7 @@
 <Project>
   <PropertyGroup>
     <id>BitMagic</id>
-    <version>0.0.12-alpha</version>
+    <version>0.0.22-alpha</version>
     <title>BitMagic X16 Emulator and Debugger</title>
     <authors>Yazwh0</authors>
     <owners>Yazwh0</owners>

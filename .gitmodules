@@ -22,3 +22,6 @@
 [submodule "BitMagic.TemplateEngine"]
 	path = BitMagic.TemplateEngine
 	url = https://github.com/Yazwh0/BitMagic.TemplateEngine.git
+[submodule "External/ymfm"]
+	path = External/ymfm
+	url = https://github.com/aaronsgiles/ymfm.git

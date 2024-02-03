@@ -168,7 +168,7 @@ jobs:
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           prerelease: true
-          automatic_release_tag: "develop"
+          automatic_release_tag: "prerelease"
           title: "Development Build"
           files: |
             BitMagic-TheDebugger.Linux.tar.gz

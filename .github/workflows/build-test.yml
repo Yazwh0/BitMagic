@@ -2,7 +2,7 @@ name: Build
 
 on:
   push:
-    branches: ["main"]
+    branches: ["main", "develop"]
     
 jobs:
   build-windows:
@@ -149,10 +149,26 @@ jobs:
 
       - name: Create Github Release
         uses: "marvinpinto/action-automatic-releases@latest"
+        if: github.ref == 'refs/heads/master'
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          prerelease: false
+          automatic_release_tag: "latest"
+          title: "Release Build"
+          files: |
+            BitMagic-TheDebugger.Linux.tar.gz
+            BitMagic-TheEmulator.Windows.zip
+            BitMagic-TheDebugger.Windows.zip
+            X16ESetup.msi
+            version.txt
+
+      - name: Create Github Development Release
+        uses: "marvinpinto/action-automatic-releases@latest"
+        if: github.ref == 'refs/heads/develop'
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           prerelease: true
-          automatic_release_tag: "latest"
+          automatic_release_tag: "prerelease"
           title: "Development Build"
           files: |
             BitMagic-TheDebugger.Linux.tar.gz

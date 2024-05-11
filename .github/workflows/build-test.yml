@@ -129,11 +129,11 @@ jobs:
           filename: '../../../../../BitMagic-TheDebugger.Linux.tar.gz'
           directory: BitMagic.X16Debugger/X16D/bin/Release/net6.0
 
-      - name: Copy artifacts (Setup)
-        uses: actions/download-artifact@v3
-        with:
-          name: BitMagic-Setup
-          path: .
+      # - name: Copy artifacts (Setup)
+      #   uses: actions/download-artifact@v3
+      #   with:
+      #     name: BitMagic-Setup
+      #     path: .
 
       - name: Copy artifacts (Debugger)
         uses: actions/download-artifact@v3

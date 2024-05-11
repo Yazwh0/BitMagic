@@ -3,7 +3,7 @@ name: Build
 on:
   push:
     branches: ["main", "develop"]
-    
+
 jobs:
   build-windows:
     runs-on: windows-2022
@@ -39,10 +39,10 @@ jobs:
 
       - name: Save Core Artifacts
         uses: actions/upload-artifact@v3
-        with: 
+        with:
           name: EmulatorCore
           path: BitMagic.X16Emulator\X16Emulator\EmulatorCore\x64\Release\core.obj
-  
+
       - name: Archive Emulator
         uses: thedoctor0/zip-release@0.7.1
         with:
@@ -55,30 +55,30 @@ jobs:
         with:
           type: 'zip'
           filename: 'BitMagic-TheDebugger.Windows.zip'
-          directory: BitMagic.X16Debugger/X16D/bin/Release/net6.0    
+          directory: BitMagic.X16Debugger/X16D/bin/Release/net6.0
 
       - name: Setup VS Dev
         uses: seanmiddleditch/gha-setup-vsdevenv@v4
 
-      - name: Build MSI
-        working-directory: BitMagic.X16Emulator
-        run: devenv.com BitMagic.X16Emulator.sln /project X16ESetup\X16ESetup.vdproj /build "Release|x64"
+      # - name: Build MSI
+      #   working-directory: BitMagic.X16Emulator
+      #   run: devenv.com BitMagic.X16Emulator.sln /project X16ESetup\X16ESetup.vdproj /build "Release|x64"
 
-      - name: Save Emulator Setup Artifacts
-        uses: actions/upload-artifact@v3
-        with: 
-          name: BitMagic-Setup
-          path: BitMagic.X16Emulator\X16ESetup\Release\X16ESetup.msi
+      # - name: Save Emulator Setup Artifacts
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: BitMagic-Setup
+      #     path: BitMagic.X16Emulator\X16ESetup\Release\X16ESetup.msi
 
       - name: Save Emulator Artifacts
         uses: actions/upload-artifact@v3
-        with: 
+        with:
           name: BitMagic-TheEmulator
           path: BitMagic.X16Emulator/X16E/bin/Release/net6.0/BitMagic-TheEmulator.Windows.zip
 
       - name: Save Debugger Artifacts
         uses: actions/upload-artifact@v3
-        with: 
+        with:
           name: BitMagic-TheDebugger
           path: BitMagic.X16Debugger/X16D/bin/Release/net6.0/BitMagic-TheDebugger.Windows.zip
 
@@ -97,7 +97,7 @@ jobs:
         with:
           name: EmulatorCore
           path: BitMagic.X16Emulator/X16Emulator/EmulatorCoreLinux
-          
+
       - name: Build Core Wrapper
         working-directory: BitMagic.X16Emulator/X16Emulator/EmulatorCoreLinux
         run: |
@@ -109,14 +109,14 @@ jobs:
         run: |
           mkdir -p BitMagic.X16Emulator/X16Emulator/EmulatorCore/x64/Release
           cp BitMagic.X16Emulator/X16Emulator/EmulatorCoreLinux/EmulatorCore.so BitMagic.X16Emulator/X16Emulator/EmulatorCore/x64/Release/.
-  
+
       - name: Build Debugger
         run: dotnet build 'BitMagic.X16Debugger/X16D/X16D.csproj' /p:configuration=Release --nologo
 
       - name: Copy Wrapper
         run: |
           cp BitMagic.X16Emulator/X16Emulator/EmulatorCoreLinux/EmulatorCore.so BitMagic.X16Debugger/X16D/bin/Release/net6.0/.
-   
+
       - name: Create Version File
         run: |
           echo "${{ github.sha }}" > BitMagic.X16Debugger/X16D/bin/Release/net6.0/version.txt
@@ -134,13 +134,13 @@ jobs:
         with:
           name: BitMagic-Setup
           path: .
-              
+
       - name: Copy artifacts (Debugger)
         uses: actions/download-artifact@v3
         with:
           name: BitMagic-TheDebugger
           path: .
-          
+
       - name: Copy artifacts (Emulator)
         uses: actions/download-artifact@v3
         with:
@@ -159,7 +159,6 @@ jobs:
             BitMagic-TheDebugger.Linux.tar.gz
             BitMagic-TheEmulator.Windows.zip
             BitMagic-TheDebugger.Windows.zip
-            X16ESetup.msi
             version.txt
 
       - name: Create Github Development Release
@@ -174,5 +173,4 @@ jobs:
             BitMagic-TheDebugger.Linux.tar.gz
             BitMagic-TheEmulator.Windows.zip
             BitMagic-TheDebugger.Windows.zip
-            X16ESetup.msi
             version.txt

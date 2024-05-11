@@ -8,7 +8,6 @@
 *.diagsession
 *.bin
 *.prg
-**/.vscode/*
 *.cache
 *.suo
 **/.vs/*

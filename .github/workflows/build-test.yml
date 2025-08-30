@@ -36,7 +36,9 @@ jobs:
         run: copy-item 'BitMagic.X16Emulator\X16Emulator\EmulatorCore\x64\Release\EmulatorCore.dll' -Destination 'BitMagic.X16Emulator\X16E\bin\Release\net6.0\EmulatorCore.dll'
 
       - name: Copy TemplateRunner to Debugger
-        run: copy-item 'BitMagic.TemplateEngine\BitMagic.TemplateEngine.Runner\bin\release\net6.0\*.*' -Destination 'BitMagic.X16Debugger\X16D\bin\Release\net6.0\TemplateEngine'
+        run: |
+          new-item 'BitMagic.X16Debugger\X16D\bin\Release\net6.0\TemplateEngine' -type directory -force
+          copy-item 'BitMagic.TemplateEngine\BitMagic.TemplateEngine.Runner\bin\release\net6.0\*.*' -Destination 'BitMagic.X16Debugger\X16D\bin\Release\net6.0\TemplateEngine' -Recurse -Force
 
       - name: Create Version File
         run: |

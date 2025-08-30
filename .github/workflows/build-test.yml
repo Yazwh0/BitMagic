@@ -23,6 +23,9 @@ jobs:
       - name: Build Debugger
         run: dotnet build 'BitMagic.X16Debugger/X16D/X16D.csproj' /p:configuration=Release --nologo
 
+      - name: Build TemplateRunner
+        run: dotnet build 'BitMagic.TemplateEngine/BitMagic.TemplateEngine.Runner' /p:configuration=Release --nologo
+
       - name: Copy Core to Debugger
         run : copy-item 'BitMagic.X16Emulator\X16Emulator\EmulatorCore\x64\Release\EmulatorCore.dll' -Destination 'BitMagic.X16Debugger\X16D\bin\Release\net6.0\EmulatorCore.dll'
 
@@ -31,6 +34,9 @@ jobs:
 
       - name: Copy Core to Emulator
         run: copy-item 'BitMagic.X16Emulator\X16Emulator\EmulatorCore\x64\Release\EmulatorCore.dll' -Destination 'BitMagic.X16Emulator\X16E\bin\Release\net6.0\EmulatorCore.dll'
+
+      - name: Copy TemplateRunner to Debugger
+        run: copy-item 'BitMagic.TemplateEngine\BitMagic.TemplateEngine.Runner\bin\release\net6.0\*.*' -Destination 'BitMagic.X16Debugger\X16D\bin\Release\net6.0\TemplateEngine'
 
       - name: Create Version File
         run: |

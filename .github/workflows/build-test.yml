@@ -121,6 +121,14 @@ jobs:
       - name: Build Debugger
         run: dotnet build 'BitMagic.X16Debugger/X16D/X16D.csproj' /p:configuration=Release --nologo
 
+      - name: Build TemplateRunner
+        run: dotnet build 'BitMagic.TemplateEngine/BitMagic.TemplateEngine.Runner' /p:configuration=Release --nologo
+
+      - name: Copy TemplateRunner to Debugger
+        run: |
+          mkdir BitMagic.X16Debugger/X16D/bin/Release/net6.0/TemplateEngine
+          cp -R BitMagic.TemplateEngine/BitMagic.TemplateEngine.Runner/bin/release/net6.0/* BitMagic.X16Debugger/X16D/bin/Release/net6.0/TemplateEngine
+
       - name: Copy Wrapper
         run: |
           cp BitMagic.X16Emulator/X16Emulator/EmulatorCoreLinux/EmulatorCore.so BitMagic.X16Debugger/X16D/bin/Release/net6.0/.

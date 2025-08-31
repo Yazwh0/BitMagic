@@ -127,7 +127,7 @@ jobs:
       - name: Copy TemplateRunner to Debugger
         run: |
           mkdir BitMagic.X16Debugger/X16D/bin/Release/net6.0/TemplateEngine
-          cp -R BitMagic.TemplateEngine/BitMagic.TemplateEngine.Runner/bin/Release/net6.0/* BitMagic.X16Debugger/X16D/bin/Release/net6.0/TemplateEngine
+          cp -R -v BitMagic.TemplateEngine/BitMagic.TemplateEngine.Runner/bin/Release/net6.0/* BitMagic.X16Debugger/X16D/bin/Release/net6.0/TemplateEngine
 
       - name: Copy Wrapper
         run: |

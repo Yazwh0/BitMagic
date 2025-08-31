@@ -38,7 +38,7 @@ jobs:
       - name: Copy TemplateRunner to Debugger
         run: |
           new-item 'BitMagic.X16Debugger\X16D\bin\Release\net6.0\TemplateEngine' -type directory -force
-          copy-item 'BitMagic.TemplateEngine\BitMagic.TemplateEngine.Runner\bin\release\net6.0\*.*' -Destination 'BitMagic.X16Debugger\X16D\bin\Release\net6.0\TemplateEngine' -Recurse -Force
+          copy-item 'BitMagic.TemplateEngine\BitMagic.TemplateEngine.Runner\bin\Release\net6.0\*.*' -Destination 'BitMagic.X16Debugger\X16D\bin\Release\net6.0\TemplateEngine' -Recurse -Force
 
       - name: Create Version File
         run: |
@@ -127,7 +127,7 @@ jobs:
       - name: Copy TemplateRunner to Debugger
         run: |
           mkdir BitMagic.X16Debugger/X16D/bin/Release/net6.0/TemplateEngine
-          cp -R BitMagic.TemplateEngine/BitMagic.TemplateEngine.Runner/bin/release/net6.0/* BitMagic.X16Debugger/X16D/bin/Release/net6.0/TemplateEngine
+          cp -R BitMagic.TemplateEngine/BitMagic.TemplateEngine.Runner/bin/Release/net6.0/* BitMagic.X16Debugger/X16D/bin/Release/net6.0/TemplateEngine
 
       - name: Copy Wrapper
         run: |

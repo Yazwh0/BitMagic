@@ -163,6 +163,7 @@ jobs:
           name: BitMagic-TheEmulator
           path: .
 
+# todo: replace these with https://github.com/softprops/action-gh-release
       - name: Create Github Release
         uses: "marvinpinto/action-automatic-releases@latest"
         if: github.ref == 'refs/heads/main'

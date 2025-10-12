@@ -28,3 +28,4 @@ test.zip
 **/Publish/*
 publish.bat
 *- Backup.*
+*.ods

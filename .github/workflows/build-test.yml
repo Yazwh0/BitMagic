@@ -109,6 +109,7 @@ jobs:
       - name: Build Core Wrapper
         working-directory: BitMagic.X16Emulator/X16Emulator/EmulatorCoreLinux
         run: |
+          ls -l
           chmod +x build.sh
           ./build.sh
           ls -l

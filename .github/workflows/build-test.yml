@@ -110,6 +110,7 @@ jobs:
         working-directory: BitMagic.X16Emulator/X16Emulator/EmulatorCoreLinux
         run: |
           ls -l
+          md5sum core.obj
           chmod +x build.sh
           ./build.sh
           ls -l

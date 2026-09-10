@@ -134,12 +134,16 @@ jobs:
       # job (where the EmulatorCore.vcxproj build triggers this) nothing has built the
       # ZiModem host .so yet. BitMagic.X16Emulator.csproj <Content>-copies
       # build/native/bin/libzimodem_host.so, so it must exist before "Build Debugger".
-      # cmake / gcc / make ship on the ubuntu-24.04 image; mirrors the by-hand build in
-      # External/BitMagic.ZiModem (default generator, single-config, tests off).
+      # cmake / gcc / make ship on the ubuntu-24.04 image.
+      #
+      # ZIMODEM_HOST_MSABI=ON: the emulator core calls this .so from hand-written x64 MASM
+      # that uses the Windows calling convention on every platform, so this dedicated copy
+      # is compiled with __attribute__((ms_abi)) on its ABI boundary. It forbids building
+      # the (SysV-convention) test suites, hence tests OFF.
       - name: Build ZiModem Host
         working-directory: External/BitMagic.ZiModem
         run: |
-          cmake -S native -B build/native -DZIMODEM_BUILD_TESTS=OFF
+          cmake -S native -B build/native -DZIMODEM_HOST_MSABI=ON -DZIMODEM_BUILD_TESTS=OFF
           cmake --build build/native --target zimodem_host -j"$(nproc)"
           ls -l build/native/bin
 

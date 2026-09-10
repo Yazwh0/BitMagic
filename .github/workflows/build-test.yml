@@ -100,6 +100,16 @@ jobs:
         with:
           submodules: recursive
 
+      # 8.0 runtime is needed by the ZiModem vendoring tool (tools/Vendoring targets
+      # net8.0, run by the CMake build below); 10.0 keeps the C# project builds on the
+      # same SDK the runner image already uses.
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            10.0.x
+
       - name: Copy artifacts
         uses: actions/download-artifact@v4
         with:
@@ -119,6 +129,19 @@ jobs:
         run: |
           mkdir -p BitMagic.X16Emulator/X16Emulator/EmulatorCore/x64/Release
           cp BitMagic.X16Emulator/X16Emulator/EmulatorCoreLinux/EmulatorCore.so BitMagic.X16Emulator/X16Emulator/EmulatorCore/x64/Release/.
+
+      # The Linux core is a prebuilt core.obj linked by build.sh, so unlike the Windows
+      # job (where the EmulatorCore.vcxproj build triggers this) nothing has built the
+      # ZiModem host .so yet. BitMagic.X16Emulator.csproj <Content>-copies
+      # build/native/bin/libzimodem_host.so, so it must exist before "Build Debugger".
+      # cmake / gcc / make ship on the ubuntu-24.04 image; mirrors the by-hand build in
+      # External/BitMagic.ZiModem (default generator, single-config, tests off).
+      - name: Build ZiModem Host
+        working-directory: External/BitMagic.ZiModem
+        run: |
+          cmake -S native -B build/native -DZIMODEM_BUILD_TESTS=OFF
+          cmake --build build/native --target zimodem_host -j"$(nproc)"
+          ls -l build/native/bin
 
       - name: Build Debugger
         run: dotnet build 'BitMagic.X16Debugger/X16D/X16D.csproj' /p:configuration=Release --nologo

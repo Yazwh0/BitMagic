@@ -28,3 +28,6 @@
 [submodule "BitMagic.Examples"]
 	path = BitMagic.Examples
 	url = https://github.com/Yazwh0/BitMagic.Examples.git
+[submodule "External/BitMagic.ZiModem"]
+	path = External/BitMagic.ZiModem
+	url = https://github.com/Yazwh0/BitMagic.ZiModem.git

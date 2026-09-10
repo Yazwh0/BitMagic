@@ -1,0 +1,19 @@
+root = true
+
+[*.cs]
+
+# S125: Sections of code should not be commented out
+# Commented-out code is used deliberately throughout this codebase (asm-mirroring
+# notes, disabled diagnostics, WIP scaffolding) -- suppress project-wide.
+dotnet_diagnostic.S125.severity = none
+
+# S6640: Using "unsafe" code blocks is security-sensitive
+# Unsafe code is unavoidable here -- native interop, pinned emulator state, raw
+# memory spans over the core's buffers -- suppress project-wide.
+dotnet_diagnostic.S6640.severity = none
+
+# S3776: Cognitive Complexity of methods should not be too high
+# Emulator dispatch, opcode handling and DAP request handlers are inherently
+# branchy; splitting them for the metric's sake hurts readability -- suppress
+# project-wide.
+dotnet_diagnostic.S3776.severity = none

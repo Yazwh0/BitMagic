@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.4.33403.182
+# Visual Studio Version 18
+VisualStudioVersion = 18.9.12112.369 stable
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "X16D", "BitMagic.X16Debugger\X16D\X16D.csproj", "{1A61AC4C-C457-44E1-844D-DE1E5FCCF6E2}"
 EndProject
@@ -98,6 +98,12 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BitMagic.ImageHelper.Tester", "BitMagic.X16Debugger\BitMagic.ImageHelper.Tester\BitMagic.ImageHelper.Tester.csproj", "{B47D2EDF-10E7-477B-B0FF-C308AC152CE1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "X16KernelTokenGenerator", "BitMagic.X16Debugger\X16KernelTokenGenerator\X16KernelTokenGenerator.csproj", "{315F6888-5BEC-4C36-811C-CB162EA85EFE}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ZiModem", "ZiModem", "{EA9A9461-65C5-4A08-AC88-D691CA7E6D96}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZiModem.Net", "External\BitMagic.ZiModem\managed\ZiModem.Net\ZiModem.Net.csproj", "{169D0060-163E-95B7-FD6B-8E961F82C176}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ZiModemHost", "External\BitMagic.ZiModem\native\ZiModemHost.vcxproj", "{7E3EFF57-92D4-4994-8681-7D99B3F5A5A1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -481,6 +487,28 @@ Global
 		{315F6888-5BEC-4C36-811C-CB162EA85EFE}.Release|x64.Build.0 = Release|Any CPU
 		{315F6888-5BEC-4C36-811C-CB162EA85EFE}.Release|x86.ActiveCfg = Release|Any CPU
 		{315F6888-5BEC-4C36-811C-CB162EA85EFE}.Release|x86.Build.0 = Release|Any CPU
+		{169D0060-163E-95B7-FD6B-8E961F82C176}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{169D0060-163E-95B7-FD6B-8E961F82C176}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{169D0060-163E-95B7-FD6B-8E961F82C176}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{169D0060-163E-95B7-FD6B-8E961F82C176}.Debug|x64.Build.0 = Debug|Any CPU
+		{169D0060-163E-95B7-FD6B-8E961F82C176}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{169D0060-163E-95B7-FD6B-8E961F82C176}.Debug|x86.Build.0 = Debug|Any CPU
+		{169D0060-163E-95B7-FD6B-8E961F82C176}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{169D0060-163E-95B7-FD6B-8E961F82C176}.Release|Any CPU.Build.0 = Release|Any CPU
+		{169D0060-163E-95B7-FD6B-8E961F82C176}.Release|x64.ActiveCfg = Release|Any CPU
+		{169D0060-163E-95B7-FD6B-8E961F82C176}.Release|x64.Build.0 = Release|Any CPU
+		{169D0060-163E-95B7-FD6B-8E961F82C176}.Release|x86.ActiveCfg = Release|Any CPU
+		{169D0060-163E-95B7-FD6B-8E961F82C176}.Release|x86.Build.0 = Release|Any CPU
+		{7E3EFF57-92D4-4994-8681-7D99B3F5A5A1}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{7E3EFF57-92D4-4994-8681-7D99B3F5A5A1}.Debug|Any CPU.Build.0 = Debug|x64
+		{7E3EFF57-92D4-4994-8681-7D99B3F5A5A1}.Debug|x64.ActiveCfg = Debug|x64
+		{7E3EFF57-92D4-4994-8681-7D99B3F5A5A1}.Debug|x64.Build.0 = Debug|x64
+		{7E3EFF57-92D4-4994-8681-7D99B3F5A5A1}.Debug|x86.ActiveCfg = Debug|x64
+		{7E3EFF57-92D4-4994-8681-7D99B3F5A5A1}.Release|Any CPU.ActiveCfg = Release|x64
+		{7E3EFF57-92D4-4994-8681-7D99B3F5A5A1}.Release|Any CPU.Build.0 = Release|x64
+		{7E3EFF57-92D4-4994-8681-7D99B3F5A5A1}.Release|x64.ActiveCfg = Release|x64
+		{7E3EFF57-92D4-4994-8681-7D99B3F5A5A1}.Release|x64.Build.0 = Release|x64
+		{7E3EFF57-92D4-4994-8681-7D99B3F5A5A1}.Release|x86.ActiveCfg = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -515,6 +543,9 @@ Global
 		{CF8BC7BD-5BBA-48D2-A334-747D0D11FFB3} = {25ADB53E-2320-490D-BA5D-A919AF7B42E5}
 		{B47D2EDF-10E7-477B-B0FF-C308AC152CE1} = {25ADB53E-2320-490D-BA5D-A919AF7B42E5}
 		{315F6888-5BEC-4C36-811C-CB162EA85EFE} = {A8C28097-0281-4E86-BEA0-8864A21B72B9}
+		{EA9A9461-65C5-4A08-AC88-D691CA7E6D96} = {56C1711B-E0BB-40B0-BAF6-77E3206969A6}
+		{169D0060-163E-95B7-FD6B-8E961F82C176} = {EA9A9461-65C5-4A08-AC88-D691CA7E6D96}
+		{7E3EFF57-92D4-4994-8681-7D99B3F5A5A1} = {EA9A9461-65C5-4A08-AC88-D691CA7E6D96}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DFCB7DF5-52B3-4B9B-9814-3EC16549A76F}

@@ -20,6 +20,11 @@ jobs:
       - name: Build Emulator Core
         run: msbuild 'BitMagic.X16Emulator/X16Emulator/EmulatorCore/EmulatorCore.vcxproj' /p:configuration=Release /p:platform=x64
 
+      # BitMagic.X16Emulator.csproj <Content>-copies this unconditionally, in Release too,
+      # so it must exist before "Build Debugger"/"Build Emulator" in build-windows.
+      - name: Build ZiModem Host
+        run: msbuild 'External/BitMagic.ZiModem/native/ZiModemHost.vcxproj' /p:configuration=Release /p:platform=x64
+
       # core.obj is the portable input build-linux links into EmulatorCore.so; EmulatorCore.dll
       # is what build-windows needs directly. Split out so build-windows and build-linux can run
       # in parallel off this one small job instead of build-linux waiting on the full Windows build.
@@ -34,6 +39,12 @@ jobs:
         with:
           name: EmulatorCoreDll
           path: BitMagic.X16Emulator\X16Emulator\EmulatorCore\x64\Release\EmulatorCore.dll
+
+      - name: Save ZiModem Host Artifact
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: ZiModemHostDll
+          path: External\BitMagic.ZiModem\build\native\bin\zimodem_host.dll
 
   build-windows:
     needs: build-core
@@ -50,6 +61,12 @@ jobs:
         with:
           name: EmulatorCoreDll
           path: BitMagic.X16Emulator\X16Emulator\EmulatorCore\x64\Release
+
+      - name: Download ZiModem Host
+        uses: actions/download-artifact@v4
+        with:
+          name: ZiModemHostDll
+          path: External\BitMagic.ZiModem\build\native\bin
 
       - name: Build Debugger
         run: dotnet build 'BitMagic.X16Debugger/X16D/X16D.csproj' /p:configuration=Release --nologo

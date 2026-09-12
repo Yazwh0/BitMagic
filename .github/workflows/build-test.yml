@@ -162,9 +162,17 @@ jobs:
         run: |
           cp BitMagic.X16Emulator/X16Emulator/EmulatorCoreLinux/EmulatorCore.so BitMagic.X16Debugger/X16D/bin/Release/net6.0/.
 
+      - name: Build Emulator
+        run: dotnet build 'BitMagic.X16Emulator/X16E/X16E.csproj' /p:configuration=Release --nologo
+
+      - name: Copy Wrapper to Emulator
+        run: |
+          cp BitMagic.X16Emulator/X16Emulator/EmulatorCoreLinux/EmulatorCore.so BitMagic.X16Emulator/X16E/bin/Release/net6.0/.
+
       - name: Create Version File
         run: |
           echo "${{ github.sha }}" > BitMagic.X16Debugger/X16D/bin/Release/net6.0/version.txt
+          echo "${{ github.sha }}" > BitMagic.X16Emulator/X16E/bin/Release/net6.0/version.txt
           echo "${{ github.sha }}" > version.txt
 
       - name: Archive Debugger
@@ -173,6 +181,13 @@ jobs:
           type: 'tar'
           filename: '../../../../../BitMagic-TheDebugger.Linux.tar.gz'
           directory: BitMagic.X16Debugger/X16D/bin/Release/net6.0
+
+      - name: Archive Emulator
+        uses: thedoctor0/zip-release@0.7.1
+        with:
+          type: 'tar'
+          filename: '../../../../../BitMagic-TheEmulator.Linux.tar.gz'
+          directory: BitMagic.X16Emulator/X16E/bin/Release/net6.0
 
       # - name: Copy artifacts (Setup)
       #   uses: actions/download-artifact@v3
@@ -203,6 +218,7 @@ jobs:
           title: "Release Build"
           files: |
             BitMagic-TheDebugger.Linux.tar.gz
+            BitMagic-TheEmulator.Linux.tar.gz
             BitMagic-TheEmulator.Windows.zip
             BitMagic-TheDebugger.Windows.zip
             version.txt
@@ -217,6 +233,7 @@ jobs:
           title: "Development Build"
           files: |
             BitMagic-TheDebugger.Linux.tar.gz
+            BitMagic-TheEmulator.Linux.tar.gz
             BitMagic-TheEmulator.Windows.zip
             BitMagic-TheDebugger.Windows.zip
             version.txt

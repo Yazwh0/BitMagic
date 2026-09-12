@@ -15,7 +15,7 @@ jobs:
           submodules: recursive
 
       - name: Setup MSBuild.exe
-        uses: microsoft/setup-msbuild@v5
+        uses: microsoft/setup-msbuild@v3.0.0
 
       - name: Build Emulator Core
         run: msbuild 'BitMagic.X16Emulator/X16Emulator/EmulatorCore/EmulatorCore.vcxproj' /p:configuration=Release /p:platform=x64

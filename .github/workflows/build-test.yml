@@ -110,8 +110,8 @@ jobs:
           filename: 'BitMagic-TheDebugger.Windows.zip'
           directory: BitMagic.X16Debugger/X16D/bin/Release/net10.0
 
-      - name: Setup VS Dev
-        uses: seanmiddleditch/gha-setup-vsdevenv@v5
+      # - name: Setup VS Dev
+      #   uses: seanmiddleditch/gha-setup-vsdevenv@v5
 
       # - name: Build MSI
       #   working-directory: BitMagic.X16Emulator

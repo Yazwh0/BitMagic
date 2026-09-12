@@ -83,9 +83,8 @@ jobs:
       - name: Copy Core to Emulator
         run: copy-item 'BitMagic.X16Emulator\X16Emulator\EmulatorCore\x64\Release\EmulatorCore.dll' -Destination 'BitMagic.X16Emulator\X16E\bin\Release\net10.0\EmulatorCore.dll'
 
-      - name: Fetch ROM
-        run: BitMagic.X16Emulator\X16E\fetch-rom.bat BitMagic.X16Emulator\X16E\bin\Release\net10.0
-        shell: cmd
+      - name: Copy ROM Fetch Script
+        run: copy-item 'BitMagic.X16Emulator\X16E\fetch-rom.bat' -Destination 'BitMagic.X16Emulator\X16E\bin\Release\net10.0\fetch-rom.bat'
 
       - name: Copy TemplateRunner to Debugger
         run: |
@@ -215,10 +214,10 @@ jobs:
         run: |
           cp BitMagic.X16Emulator/X16Emulator/EmulatorCoreLinux/EmulatorCore.so BitMagic.X16Emulator/X16E/bin/Release/net10.0/.
 
-      - name: Fetch ROM
+      - name: Copy ROM Fetch Script
         run: |
-          chmod +x BitMagic.X16Emulator/X16E/fetch-rom.sh
-          BitMagic.X16Emulator/X16E/fetch-rom.sh 'BitMagic.X16Emulator/X16E/bin/Release/net10.0'
+          cp BitMagic.X16Emulator/X16E/fetch-rom.sh BitMagic.X16Emulator/X16E/bin/Release/net10.0/.
+          chmod +x BitMagic.X16Emulator/X16E/bin/Release/net10.0/fetch-rom.sh
 
       - name: Copy Prerequisite Check
         run: |

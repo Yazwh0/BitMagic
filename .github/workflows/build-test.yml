@@ -211,6 +211,11 @@ jobs:
         run: |
           cp BitMagic.X16Emulator/X16Emulator/EmulatorCoreLinux/EmulatorCore.so BitMagic.X16Emulator/X16E/bin/Release/net6.0/.
 
+      - name: Copy Prerequisite Check
+        run: |
+          cp BitMagic.X16Emulator/X16E/check-prerequisites.sh BitMagic.X16Emulator/X16E/bin/Release/net6.0/.
+          chmod +x BitMagic.X16Emulator/X16E/bin/Release/net6.0/check-prerequisites.sh
+
       - name: Create Version File
         run: |
           echo "${{ github.sha }}" > BitMagic.X16Debugger/X16D/bin/Release/net6.0/version.txt

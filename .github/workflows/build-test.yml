@@ -57,13 +57,13 @@ jobs:
           submodules: recursive
 
       - name: Download Core
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8.0.1
         with:
           name: EmulatorCoreDll
           path: BitMagic.X16Emulator\X16Emulator\EmulatorCore\x64\Release
 
       - name: Download ZiModem Host
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8.0.1
         with:
           name: ZiModemHostDll
           path: External\BitMagic.ZiModem\build\native\bin
@@ -75,37 +75,37 @@ jobs:
         run: dotnet build 'BitMagic.TemplateEngine/BitMagic.TemplateEngine.Runner' /p:configuration=Release --nologo
 
       - name: Copy Core to Debugger
-        run : copy-item 'BitMagic.X16Emulator\X16Emulator\EmulatorCore\x64\Release\EmulatorCore.dll' -Destination 'BitMagic.X16Debugger\X16D\bin\Release\net6.0\EmulatorCore.dll'
+        run : copy-item 'BitMagic.X16Emulator\X16Emulator\EmulatorCore\x64\Release\EmulatorCore.dll' -Destination 'BitMagic.X16Debugger\X16D\bin\Release\net10.0\EmulatorCore.dll'
 
       - name: Build Emulator
         run: dotnet build 'BitMagic.X16Emulator/X16E/X16E.csproj' /p:configuration=Release --nologo
 
       - name: Copy Core to Emulator
-        run: copy-item 'BitMagic.X16Emulator\X16Emulator\EmulatorCore\x64\Release\EmulatorCore.dll' -Destination 'BitMagic.X16Emulator\X16E\bin\Release\net6.0\EmulatorCore.dll'
+        run: copy-item 'BitMagic.X16Emulator\X16Emulator\EmulatorCore\x64\Release\EmulatorCore.dll' -Destination 'BitMagic.X16Emulator\X16E\bin\Release\net10.0\EmulatorCore.dll'
 
       - name: Copy TemplateRunner to Debugger
         run: |
-          new-item 'BitMagic.X16Debugger\X16D\bin\Release\net6.0\TemplateEngine' -type directory -force
-          copy-item 'BitMagic.TemplateEngine\BitMagic.TemplateEngine.Runner\bin\Release\net6.0\*.*' -Destination 'BitMagic.X16Debugger\X16D\bin\Release\net6.0\TemplateEngine' -Recurse -Force
+          new-item 'BitMagic.X16Debugger\X16D\bin\Release\net10.0\TemplateEngine' -type directory -force
+          copy-item 'BitMagic.TemplateEngine\BitMagic.TemplateEngine.Runner\bin\Release\net10.0\*.*' -Destination 'BitMagic.X16Debugger\X16D\bin\Release\net10.0\TemplateEngine' -Recurse -Force
 
       - name: Create Version File
         run: |
-          echo "${{ github.sha }}" > BitMagic.X16Emulator/X16E/bin/Release/net6.0/version.txt
-          echo "${{ github.sha }}" > BitMagic.X16Debugger/X16D/bin/Release/net6.0/version.txt
+          echo "${{ github.sha }}" > BitMagic.X16Emulator/X16E/bin/Release/net10.0/version.txt
+          echo "${{ github.sha }}" > BitMagic.X16Debugger/X16D/bin/Release/net10.0/version.txt
 
       - name: Archive Emulator
         uses: thedoctor0/zip-release@0.7.1
         with:
           type: 'zip'
           filename: 'BitMagic-TheEmulator.Windows.zip'
-          directory: BitMagic.X16Emulator/X16E/bin/Release/net6.0
+          directory: BitMagic.X16Emulator/X16E/bin/Release/net10.0
 
       - name: Archive Debugger
         uses: thedoctor0/zip-release@0.7.1
         with:
           type: 'zip'
           filename: 'BitMagic-TheDebugger.Windows.zip'
-          directory: BitMagic.X16Debugger/X16D/bin/Release/net6.0
+          directory: BitMagic.X16Debugger/X16D/bin/Release/net10.0
 
       - name: Setup VS Dev
         uses: seanmiddleditch/gha-setup-vsdevenv@v5
@@ -124,13 +124,13 @@ jobs:
         uses: actions/upload-artifact@v7.0.1
         with:
           name: BitMagic-TheEmulator
-          path: BitMagic.X16Emulator/X16E/bin/Release/net6.0/BitMagic-TheEmulator.Windows.zip
+          path: BitMagic.X16Emulator/X16E/bin/Release/net10.0/BitMagic-TheEmulator.Windows.zip
 
       - name: Save Debugger Artifacts
         uses: actions/upload-artifact@v7.0.1
         with:
           name: BitMagic-TheDebugger
-          path: BitMagic.X16Debugger/X16D/bin/Release/net6.0/BitMagic-TheDebugger.Windows.zip
+          path: BitMagic.X16Debugger/X16D/bin/Release/net10.0/BitMagic-TheDebugger.Windows.zip
 
   build-linux:
     needs: build-core
@@ -146,14 +146,14 @@ jobs:
       # net8.0, run by the CMake build below); 10.0 keeps the C# project builds on the
       # same SDK the runner image already uses.
       - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v6.0.0
         with:
           dotnet-version: |
             8.0.x
             10.0.x
 
       - name: Copy artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8.0.1
         with:
           name: EmulatorCore
           path: BitMagic.X16Emulator/X16Emulator/EmulatorCoreLinux
@@ -197,43 +197,43 @@ jobs:
 
       - name: Copy TemplateRunner to Debugger
         run: |
-          mkdir BitMagic.X16Debugger/X16D/bin/Release/net6.0/TemplateEngine
-          cp -R -v BitMagic.TemplateEngine/BitMagic.TemplateEngine.Runner/bin/Release/net6.0/* BitMagic.X16Debugger/X16D/bin/Release/net6.0/TemplateEngine
+          mkdir BitMagic.X16Debugger/X16D/bin/Release/net10.0/TemplateEngine
+          cp -R -v BitMagic.TemplateEngine/BitMagic.TemplateEngine.Runner/bin/Release/net10.0/* BitMagic.X16Debugger/X16D/bin/Release/net10.0/TemplateEngine
 
       - name: Copy Wrapper
         run: |
-          cp BitMagic.X16Emulator/X16Emulator/EmulatorCoreLinux/EmulatorCore.so BitMagic.X16Debugger/X16D/bin/Release/net6.0/.
+          cp BitMagic.X16Emulator/X16Emulator/EmulatorCoreLinux/EmulatorCore.so BitMagic.X16Debugger/X16D/bin/Release/net10.0/.
 
       - name: Build Emulator
         run: dotnet build 'BitMagic.X16Emulator/X16E/X16E.csproj' /p:configuration=Release --nologo
 
       - name: Copy Wrapper to Emulator
         run: |
-          cp BitMagic.X16Emulator/X16Emulator/EmulatorCoreLinux/EmulatorCore.so BitMagic.X16Emulator/X16E/bin/Release/net6.0/.
+          cp BitMagic.X16Emulator/X16Emulator/EmulatorCoreLinux/EmulatorCore.so BitMagic.X16Emulator/X16E/bin/Release/net10.0/.
 
       - name: Copy Prerequisite Check
         run: |
-          cp BitMagic.X16Emulator/X16E/check-prerequisites.sh BitMagic.X16Emulator/X16E/bin/Release/net6.0/.
-          chmod +x BitMagic.X16Emulator/X16E/bin/Release/net6.0/check-prerequisites.sh
+          cp BitMagic.X16Emulator/X16E/check-prerequisites.sh BitMagic.X16Emulator/X16E/bin/Release/net10.0/.
+          chmod +x BitMagic.X16Emulator/X16E/bin/Release/net10.0/check-prerequisites.sh
 
       - name: Create Version File
         run: |
-          echo "${{ github.sha }}" > BitMagic.X16Debugger/X16D/bin/Release/net6.0/version.txt
-          echo "${{ github.sha }}" > BitMagic.X16Emulator/X16E/bin/Release/net6.0/version.txt
+          echo "${{ github.sha }}" > BitMagic.X16Debugger/X16D/bin/Release/net10.0/version.txt
+          echo "${{ github.sha }}" > BitMagic.X16Emulator/X16E/bin/Release/net10.0/version.txt
 
       - name: Archive Debugger
         uses: thedoctor0/zip-release@0.7.1
         with:
           type: 'tar'
           filename: '../../../../../BitMagic-TheDebugger.Linux.tar.gz'
-          directory: BitMagic.X16Debugger/X16D/bin/Release/net6.0
+          directory: BitMagic.X16Debugger/X16D/bin/Release/net10.0
 
       - name: Archive Emulator
         uses: thedoctor0/zip-release@0.7.1
         with:
           type: 'tar'
           filename: '../../../../../BitMagic-TheEmulator.Linux.tar.gz'
-          directory: BitMagic.X16Emulator/X16E/bin/Release/net6.0
+          directory: BitMagic.X16Emulator/X16E/bin/Release/net10.0
 
       - name: Save Linux Artifacts
         uses: actions/upload-artifact@v7.0.1
@@ -260,19 +260,19 @@ jobs:
       #     path: .
 
       - name: Copy artifacts (Debugger)
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8.0.1
         with:
           name: BitMagic-TheDebugger
           path: .
 
       - name: Copy artifacts (Emulator)
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8.0.1
         with:
           name: BitMagic-TheEmulator
           path: .
 
       - name: Copy artifacts (Linux)
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8.0.1
         with:
           name: BitMagic-Linux
           path: .

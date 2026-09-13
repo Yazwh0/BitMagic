@@ -91,10 +91,21 @@ jobs:
           new-item 'BitMagic.X16Debugger\X16D\bin\Release\net10.0\TemplateEngine' -type directory -force
           copy-item 'BitMagic.TemplateEngine\BitMagic.TemplateEngine.Runner\bin\Release\net10.0\*.*' -Destination 'BitMagic.X16Debugger\X16D\bin\Release\net10.0\TemplateEngine' -Recurse -Force
 
+      - name: Build X16M
+        run: dotnet build 'BitMagic.X16MCP/X16M/X16M.csproj' /p:configuration=Release --nologo
+
+      # Bundles the just-built Debugger next to X16M (under x16d/) so X16M finds it with no
+      # configuration needed - see X16M's Program.cs connection resolution order.
+      - name: Bundle X16D into X16M
+        run: |
+          new-item 'BitMagic.X16MCP\X16M\bin\Release\net10.0\x16d' -type directory -force
+          copy-item 'BitMagic.X16Debugger\X16D\bin\Release\net10.0\*' -Destination 'BitMagic.X16MCP\X16M\bin\Release\net10.0\x16d' -Recurse -Force
+
       - name: Create Version File
         run: |
           echo "${{ github.sha }}" > BitMagic.X16Emulator/X16E/bin/Release/net10.0/version.txt
           echo "${{ github.sha }}" > BitMagic.X16Debugger/X16D/bin/Release/net10.0/version.txt
+          echo "${{ github.sha }}" > BitMagic.X16MCP/X16M/bin/Release/net10.0/version.txt
 
       - name: Archive Emulator
         uses: thedoctor0/zip-release@0.7.1
@@ -109,6 +120,13 @@ jobs:
           type: 'zip'
           filename: 'BitMagic-TheDebugger.Windows.zip'
           directory: BitMagic.X16Debugger/X16D/bin/Release/net10.0
+
+      - name: Archive X16M
+        uses: thedoctor0/zip-release@0.7.1
+        with:
+          type: 'zip'
+          filename: 'BitMagic-TheMCP.Windows.zip'
+          directory: BitMagic.X16MCP/X16M/bin/Release/net10.0
 
       # - name: Setup VS Dev
       #   uses: seanmiddleditch/gha-setup-vsdevenv@v5
@@ -134,6 +152,12 @@ jobs:
         with:
           name: BitMagic-TheDebugger
           path: BitMagic.X16Debugger/X16D/bin/Release/net10.0/BitMagic-TheDebugger.Windows.zip
+
+      - name: Save X16M Artifacts
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: BitMagic-TheMCP
+          path: BitMagic.X16MCP/X16M/bin/Release/net10.0/BitMagic-TheMCP.Windows.zip
 
   build-linux:
     needs: build-core
@@ -207,6 +231,16 @@ jobs:
         run: |
           cp BitMagic.X16Emulator/X16Emulator/EmulatorCoreLinux/EmulatorCore.so BitMagic.X16Debugger/X16D/bin/Release/net10.0/.
 
+      - name: Build X16M
+        run: dotnet build 'BitMagic.X16MCP/X16M/X16M.csproj' /p:configuration=Release --nologo
+
+      # Bundles the just-built Debugger next to X16M (under x16d/) so X16M finds it with no
+      # configuration needed - see X16M's Program.cs connection resolution order.
+      - name: Bundle X16D into X16M
+        run: |
+          mkdir -p BitMagic.X16MCP/X16M/bin/Release/net10.0/x16d
+          cp -R BitMagic.X16Debugger/X16D/bin/Release/net10.0/* BitMagic.X16MCP/X16M/bin/Release/net10.0/x16d
+
       - name: Build Emulator
         run: dotnet build 'BitMagic.X16Emulator/X16E/X16E.csproj' /p:configuration=Release --nologo
 
@@ -228,6 +262,7 @@ jobs:
         run: |
           echo "${{ github.sha }}" > BitMagic.X16Debugger/X16D/bin/Release/net10.0/version.txt
           echo "${{ github.sha }}" > BitMagic.X16Emulator/X16E/bin/Release/net10.0/version.txt
+          echo "${{ github.sha }}" > BitMagic.X16MCP/X16M/bin/Release/net10.0/version.txt
 
       - name: Archive Debugger
         uses: thedoctor0/zip-release@0.7.1
@@ -243,6 +278,13 @@ jobs:
           filename: '../../../../../BitMagic-TheEmulator.Linux.tar.gz'
           directory: BitMagic.X16Emulator/X16E/bin/Release/net10.0
 
+      - name: Archive X16M
+        uses: thedoctor0/zip-release@0.7.1
+        with:
+          type: 'tar'
+          filename: '../../../../../BitMagic-TheMCP.Linux.tar.gz'
+          directory: BitMagic.X16MCP/X16M/bin/Release/net10.0
+
       - name: Save Linux Artifacts
         uses: actions/upload-artifact@v7.0.1
         with:
@@ -250,6 +292,7 @@ jobs:
           path: |
             BitMagic-TheDebugger.Linux.tar.gz
             BitMagic-TheEmulator.Linux.tar.gz
+            BitMagic-TheMCP.Linux.tar.gz
 
   release:
     needs: [build-windows, build-linux]
@@ -279,6 +322,12 @@ jobs:
           name: BitMagic-TheEmulator
           path: .
 
+      - name: Copy artifacts (X16M)
+        uses: actions/download-artifact@v8.0.1
+        with:
+          name: BitMagic-TheMCP
+          path: .
+
       - name: Copy artifacts (Linux)
         uses: actions/download-artifact@v8.0.1
         with:
@@ -297,8 +346,10 @@ jobs:
           files: |
             BitMagic-TheDebugger.Linux.tar.gz
             BitMagic-TheEmulator.Linux.tar.gz
+            BitMagic-TheMCP.Linux.tar.gz
             BitMagic-TheEmulator.Windows.zip
             BitMagic-TheDebugger.Windows.zip
+            BitMagic-TheMCP.Windows.zip
             version.txt
 
       - name: Create Github Development Release
@@ -313,6 +364,8 @@ jobs:
           files: |
             BitMagic-TheDebugger.Linux.tar.gz
             BitMagic-TheEmulator.Linux.tar.gz
+            BitMagic-TheMCP.Linux.tar.gz
             BitMagic-TheEmulator.Windows.zip
             BitMagic-TheDebugger.Windows.zip
+            BitMagic-TheMCP.Windows.zip
             version.txt

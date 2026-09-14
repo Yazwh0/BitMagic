@@ -87,7 +87,7 @@ jobs:
           path: External\BitMagic.ZiModem\build\native\bin\zimodem_host.dll
 
   build-windows:
-    needs: build-core
+    needs: [build-core, version]
     runs-on: windows-2022
 
     steps:
@@ -110,7 +110,7 @@ jobs:
           path: External\BitMagic.ZiModem\build\native\bin
 
       - name: Build Debugger
-        run: dotnet build 'BitMagic.X16Debugger/X16D/X16D.csproj' /p:configuration=Release --nologo
+        run: dotnet build 'BitMagic.X16Debugger/X16D/X16D.csproj' /p:configuration=Release /p:Version=${{ needs.version.outputs.nuget-version }} --nologo
 
       - name: Build TemplateRunner
         run: dotnet build 'BitMagic.TemplateEngine/BitMagic.TemplateEngine.Runner' /p:configuration=Release --nologo
@@ -119,7 +119,7 @@ jobs:
         run : copy-item 'BitMagic.X16Emulator\X16Emulator\EmulatorCore\x64\Release\EmulatorCore.dll' -Destination 'BitMagic.X16Debugger\X16D\bin\Release\net10.0\EmulatorCore.dll'
 
       - name: Build Emulator
-        run: dotnet build 'BitMagic.X16Emulator/X16E/X16E.csproj' /p:configuration=Release --nologo
+        run: dotnet build 'BitMagic.X16Emulator/X16E/X16E.csproj' /p:configuration=Release /p:Version=${{ needs.version.outputs.nuget-version }} --nologo
 
       - name: Copy Core to Emulator
         run: copy-item 'BitMagic.X16Emulator\X16Emulator\EmulatorCore\x64\Release\EmulatorCore.dll' -Destination 'BitMagic.X16Emulator\X16E\bin\Release\net10.0\EmulatorCore.dll'
@@ -133,7 +133,7 @@ jobs:
           copy-item 'BitMagic.TemplateEngine\BitMagic.TemplateEngine.Runner\bin\Release\net10.0\*.*' -Destination 'BitMagic.X16Debugger\X16D\bin\Release\net10.0\TemplateEngine' -Recurse -Force
 
       - name: Build X16M
-        run: dotnet build 'BitMagic.X16MCP/X16M/X16M.csproj' /p:configuration=Release --nologo
+        run: dotnet build 'BitMagic.X16MCP/X16M/X16M.csproj' /p:configuration=Release /p:Version=${{ needs.version.outputs.nuget-version }} --nologo
 
       # Bundles the just-built Debugger next to X16M (under x16d/) so X16M finds it with no
       # configuration needed - see X16M's Program.cs connection resolution order.
@@ -201,7 +201,7 @@ jobs:
           path: BitMagic.X16MCP/X16M/bin/Release/net10.0/BitMagic-TheMCP.Windows.zip
 
   build-linux:
-    needs: build-core
+    needs: [build-core, version]
     runs-on: ubuntu-24.04
 
     steps:
@@ -259,7 +259,7 @@ jobs:
           ls -l build/native/bin
 
       - name: Build Debugger
-        run: dotnet build 'BitMagic.X16Debugger/X16D/X16D.csproj' /p:configuration=Release --nologo
+        run: dotnet build 'BitMagic.X16Debugger/X16D/X16D.csproj' /p:configuration=Release /p:Version=${{ needs.version.outputs.nuget-version }} --nologo
 
       - name: Build TemplateRunner
         run: dotnet build 'BitMagic.TemplateEngine/BitMagic.TemplateEngine.Runner' /p:configuration=Release --nologo
@@ -274,7 +274,7 @@ jobs:
           cp BitMagic.X16Emulator/X16Emulator/EmulatorCoreLinux/EmulatorCore.so BitMagic.X16Debugger/X16D/bin/Release/net10.0/.
 
       - name: Build X16M
-        run: dotnet build 'BitMagic.X16MCP/X16M/X16M.csproj' /p:configuration=Release --nologo
+        run: dotnet build 'BitMagic.X16MCP/X16M/X16M.csproj' /p:configuration=Release /p:Version=${{ needs.version.outputs.nuget-version }} --nologo
 
       # Bundles the just-built Debugger next to X16M (under x16d/) so X16M finds it with no
       # configuration needed - see X16M's Program.cs connection resolution order.
@@ -284,7 +284,7 @@ jobs:
           cp -R BitMagic.X16Debugger/X16D/bin/Release/net10.0/* BitMagic.X16MCP/X16M/bin/Release/net10.0/x16d
 
       - name: Build Emulator
-        run: dotnet build 'BitMagic.X16Emulator/X16E/X16E.csproj' /p:configuration=Release --nologo
+        run: dotnet build 'BitMagic.X16Emulator/X16E/X16E.csproj' /p:configuration=Release /p:Version=${{ needs.version.outputs.nuget-version }} --nologo
 
       - name: Copy Wrapper to Emulator
         run: |
@@ -415,6 +415,8 @@ jobs:
   nuget-publish:
     needs: [version, build-windows, build-linux]
     runs-on: ubuntu-24.04
+    permissions:
+      id-token: write # enable GitHub OIDC token issuance, needed for NuGet Trusted Publishing
 
     steps:
       - name: Checkout
@@ -452,5 +454,14 @@ jobs:
       - name: Pack X16M
         run: dotnet pack 'BitMagic.X16MCP/X16M/X16M.csproj' -c Release -o nupkgs /p:Version=${{ needs.version.outputs.nuget-version }}
 
+      # Exchanges this job's GitHub OIDC token for a short-lived (1 hour) NuGet API key via
+      # the trusted-publishing policy configured on nuget.org for Yazwh0/BitMagic +
+      # build-test.yml -- no long-lived NUGET_API_KEY secret to store or rotate.
+      - name: NuGet login (OIDC -> temp API key)
+        uses: NuGet/login@v1
+        id: nuget-login
+        with:
+          user: ${{ secrets.NUGET_USER }}
+
       - name: Push to NuGet
-        run: dotnet nuget push "nupkgs/*.nupkg" -k ${{ secrets.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json --skip-duplicate
+        run: dotnet nuget push "nupkgs/*.nupkg" --api-key ${{ steps.nuget-login.outputs.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json --skip-duplicate

@@ -5,6 +5,45 @@ on:
     branches: ["main", "develop"]
 
 jobs:
+  # No `needs:` - this has no dependency on build-core, so it runs in parallel with it
+  # rather than serializing behind a job it doesn't need anything from.
+  version:
+    runs-on: ubuntu-24.04
+
+    outputs:
+      nuget-version: ${{ steps.nbgv.outputs.nuget-version }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7.0.1
+        with:
+          submodules: false
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v6.0.0
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Restore dotnet tools
+        run: dotnet tool restore
+
+      # PublicRelease drops the git-commit-hash prerelease suffix, giving a clean X.Y.Z for
+      # real releases; without it every commit gets its own unique X.Y.Z-g<sha> automatically -
+      # both computed purely from local git history, no tag required either way.
+      - name: Compute version
+        id: nbgv
+        shell: bash
+        run: |
+          if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            PUBLIC_RELEASE=true
+          else
+            PUBLIC_RELEASE=false
+          fi
+          VERSION=$(dotnet nbgv get-version -v NuGetPackageVersion --public-release=$PUBLIC_RELEASE)
+          echo "nuget-version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Computed version: $VERSION"
+
   build-core:
     runs-on: windows-2022
 
@@ -13,6 +52,7 @@ jobs:
         uses: actions/checkout@v7.0.1
         with:
           submodules: recursive
+          fetch-depth: 0
 
       - name: Setup MSBuild.exe
         uses: microsoft/setup-msbuild@v3.0.0
@@ -55,6 +95,7 @@ jobs:
         uses: actions/checkout@v7.0.1
         with:
           submodules: recursive
+          fetch-depth: 0
 
       - name: Download Core
         uses: actions/download-artifact@v8.0.1
@@ -168,6 +209,7 @@ jobs:
         uses: actions/checkout@v7.0.1
         with:
           submodules: recursive
+          fetch-depth: 0
 
       # 8.0 runtime is needed by the ZiModem vendoring tool (tools/Vendoring targets
       # net8.0, run by the CMake build below); 10.0 keeps the C# project builds on the
@@ -369,3 +411,46 @@ jobs:
             BitMagic-TheDebugger.Windows.zip
             BitMagic-TheMCP.Windows.zip
             version.txt
+
+  nuget-publish:
+    needs: [version, build-windows, build-linux]
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7.0.1
+        with:
+          submodules: recursive
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v6.0.0
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Copy artifacts (Debugger Windows)
+        uses: actions/download-artifact@v8.0.1
+        with:
+          name: BitMagic-TheDebugger
+          path: .
+
+      - name: Copy artifacts (Linux)
+        uses: actions/download-artifact@v8.0.1
+        with:
+          name: BitMagic-Linux
+          path: .
+
+      # X16M.csproj bundles these per-RID (see the comment above its RuntimeIdentifiers
+      # property) - staged one level above the project directory so the SDK's implicit
+      # Compile/Content globs don't sweep up X16D's own loose .cs library sources.
+      - name: Stage X16D bundles
+        run: |
+          mkdir -p BitMagic.X16MCP/x16d-win-x64
+          unzip -q BitMagic-TheDebugger.Windows.zip -d BitMagic.X16MCP/x16d-win-x64
+          mkdir -p BitMagic.X16MCP/x16d-linux-x64
+          tar -xzf BitMagic-TheDebugger.Linux.tar.gz -C BitMagic.X16MCP/x16d-linux-x64
+
+      - name: Pack X16M
+        run: dotnet pack 'BitMagic.X16MCP/X16M/X16M.csproj' -c Release -o nupkgs /p:Version=${{ needs.version.outputs.nuget-version }}
+
+      - name: Push to NuGet
+        run: dotnet nuget push "nupkgs/*.nupkg" -k ${{ secrets.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json --skip-duplicate

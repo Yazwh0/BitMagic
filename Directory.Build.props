@@ -1,16 +1,38 @@
 <Project>
+  <!--
+    Shared NuGet packaging metadata (only takes effect for a project that sets
+    IsPackable/PackAsTool, e.g. X16M.csproj): these used to be raw .nuspec element
+    names (<id>, <license>, <icon>, <dependencies>) pasted into an MSBuild PropertyGroup,
+    which SDK-style `dotnet pack` doesn't read at all. PackageId has no sensible shared
+    default (every packable project must set its own, as X16M.csproj already does);
+    Owners has no effect under SDK-style packing (nuget.org derives ownership from the
+    account that pushes, not the nuspec); the icon path pointed at a NugetProject\ folder
+    that is dead leftover scaffolding with no butterfly.jpg in it; and <dependencies> is
+    always auto-generated correctly by the SDK from each project's actual
+    PackageReference/TargetFramework. All four were silently doing nothing.
+  -->
   <PropertyGroup>
-    <id>BitMagic</id>
-    <version>0.1.0</version>
-    <title>BitMagic X16 Emulator and Debugger</title>
-    <authors>Yazwh0</authors>
-    <owners>Yazwh0</owners>
-    <license>AGPL-3.0-or-later</license>
-    <description>X16 Emulator and Debugger</description>
-    <icon>NugetProject\butterfly.jpg</icon>
-    <dependencies>
-      <group targetFramework="net10.0" />
-    </dependencies>
+    <Version>0.1.0</Version>
+    <Title>BitMagic X16 Emulator and Debugger</Title>
+    <Authors>Yazwh0</Authors>
+    <Description>X16 Emulator and Debugger</Description>
+    <!-- The repo's actual LICENSE files are plain GPL-3.0 text (confirmed against every
+         submodule's LICENSE and GitHub's own "gpl-3.0" detection on the superproject),
+         not AGPL-3.0-or-later as this used to (ineffectually) claim. PackageLicenseFile,
+         not just a PackageLicenseExpression string, so the actual license text ships
+         inside the package rather than just an SPDX tag. -->
+    <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
     <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
   </PropertyGroup>
+
+  <!-- NuGet requires the packaged license file to have a .txt/.md extension (NU5030),
+       hence LICENSE.txt rather than the extensionless LICENSE some tools default to.
+       PackagePath="\" (matching the working README.md item in X16M.csproj) keeps the
+       source's own file name. An explicit rename via PackagePath (e.g. "LICENSE.txt" for
+       a source file just named LICENSE) nests the file under a same-named subfolder
+       instead, for a multi-RID pack like X16M's; confirmed by inspecting the generated
+       .nuspec. Renaming the source file itself sidesteps it entirely. -->
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)LICENSE.txt" Pack="true" PackagePath="\" />
+  </ItemGroup>
 </Project>

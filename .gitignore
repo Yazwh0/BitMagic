@@ -29,3 +29,5 @@ test.zip
 publish.bat
 *- Backup.*
 *.ods
+*.log
+CLAUDE.md

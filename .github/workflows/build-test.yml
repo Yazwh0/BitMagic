@@ -5,68 +5,172 @@ on:
     branches: ["main", "develop"]
 
 jobs:
-  build-windows:
+  # No `needs:` - this has no dependency on build-core, so it runs in parallel with it
+  # rather than serializing behind a job it doesn't need anything from.
+  version:
+    runs-on: ubuntu-24.04
+
+    outputs:
+      nuget-version: ${{ steps.nbgv.outputs.nuget-version }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7.0.1
+        with:
+          submodules: false
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v6.0.0
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Restore dotnet tools
+        run: dotnet tool restore
+
+      # PublicRelease drops the git-commit-hash prerelease suffix, giving a clean X.Y.Z for
+      # real releases; without it every commit gets its own unique X.Y.Z-g<sha> automatically -
+      # both computed purely from local git history, no tag required either way.
+      - name: Compute version
+        id: nbgv
+        shell: bash
+        run: |
+          if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            PUBLIC_RELEASE=true
+          else
+            PUBLIC_RELEASE=false
+          fi
+          VERSION=$(dotnet nbgv get-version -v NuGetPackageVersion --public-release=$PUBLIC_RELEASE)
+          echo "nuget-version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Computed version: $VERSION"
+
+  build-core:
     runs-on: windows-2022
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v7.0.1
         with:
           submodules: recursive
+          fetch-depth: 0
 
       - name: Setup MSBuild.exe
-        uses: microsoft/setup-msbuild@v1.3.1
+        uses: microsoft/setup-msbuild@v3.0.0
 
       - name: Build Emulator Core
         run: msbuild 'BitMagic.X16Emulator/X16Emulator/EmulatorCore/EmulatorCore.vcxproj' /p:configuration=Release /p:platform=x64
 
+      # BitMagic.X16Emulator.csproj <Content>-copies this unconditionally, in Release too,
+      # so it must exist before "Build Debugger"/"Build Emulator" in build-windows.
+      - name: Build ZiModem Host
+        run: msbuild 'External/BitMagic.ZiModem/native/ZiModemHost.vcxproj' /p:configuration=Release /p:platform=x64
+
+      # core.obj is the portable input build-linux links into EmulatorCore.so; EmulatorCore.dll
+      # is what build-windows needs directly. Split out so build-windows and build-linux can run
+      # in parallel off this one small job instead of build-linux waiting on the full Windows build.
+      - name: Save Core Artifacts
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: EmulatorCore
+          path: BitMagic.X16Emulator\X16Emulator\EmulatorCore\x64\Release\core.obj
+
+      - name: Save Core DLL Artifact
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: EmulatorCoreDll
+          path: BitMagic.X16Emulator\X16Emulator\EmulatorCore\x64\Release\EmulatorCore.dll
+
+      - name: Save ZiModem Host Artifact
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: ZiModemHostDll
+          path: External\BitMagic.ZiModem\build\native\bin\zimodem_host.dll
+
+  build-windows:
+    needs: [build-core, version]
+    runs-on: windows-2022
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7.0.1
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Download Core
+        uses: actions/download-artifact@v8.0.1
+        with:
+          name: EmulatorCoreDll
+          path: BitMagic.X16Emulator\X16Emulator\EmulatorCore\x64\Release
+
+      - name: Download ZiModem Host
+        uses: actions/download-artifact@v8.0.1
+        with:
+          name: ZiModemHostDll
+          path: External\BitMagic.ZiModem\build\native\bin
+
       - name: Build Debugger
-        run: dotnet build 'BitMagic.X16Debugger/X16D/X16D.csproj' /p:configuration=Release --nologo
+        run: dotnet build 'BitMagic.X16Debugger/X16D/X16D.csproj' /p:configuration=Release /p:Version=${{ needs.version.outputs.nuget-version }} --nologo
 
       - name: Build TemplateRunner
         run: dotnet build 'BitMagic.TemplateEngine/BitMagic.TemplateEngine.Runner' /p:configuration=Release --nologo
 
       - name: Copy Core to Debugger
-        run : copy-item 'BitMagic.X16Emulator\X16Emulator\EmulatorCore\x64\Release\EmulatorCore.dll' -Destination 'BitMagic.X16Debugger\X16D\bin\Release\net6.0\EmulatorCore.dll'
+        run : copy-item 'BitMagic.X16Emulator\X16Emulator\EmulatorCore\x64\Release\EmulatorCore.dll' -Destination 'BitMagic.X16Debugger\X16D\bin\Release\net10.0\EmulatorCore.dll'
 
       - name: Build Emulator
-        run: dotnet build 'BitMagic.X16Emulator/X16E/X16E.csproj' /p:configuration=Release --nologo
+        run: dotnet build 'BitMagic.X16Emulator/X16E/X16E.csproj' /p:configuration=Release /p:Version=${{ needs.version.outputs.nuget-version }} --nologo
 
       - name: Copy Core to Emulator
-        run: copy-item 'BitMagic.X16Emulator\X16Emulator\EmulatorCore\x64\Release\EmulatorCore.dll' -Destination 'BitMagic.X16Emulator\X16E\bin\Release\net6.0\EmulatorCore.dll'
+        run: copy-item 'BitMagic.X16Emulator\X16Emulator\EmulatorCore\x64\Release\EmulatorCore.dll' -Destination 'BitMagic.X16Emulator\X16E\bin\Release\net10.0\EmulatorCore.dll'
+
+      - name: Copy ROM Fetch Script
+        run: copy-item 'BitMagic.X16Emulator\X16E\fetch-rom.bat' -Destination 'BitMagic.X16Emulator\X16E\bin\Release\net10.0\fetch-rom.bat'
 
       - name: Copy TemplateRunner to Debugger
         run: |
-          new-item 'BitMagic.X16Debugger\X16D\bin\Release\net6.0\TemplateEngine' -type directory -force
-          copy-item 'BitMagic.TemplateEngine\BitMagic.TemplateEngine.Runner\bin\Release\net6.0\*.*' -Destination 'BitMagic.X16Debugger\X16D\bin\Release\net6.0\TemplateEngine' -Recurse -Force
+          new-item 'BitMagic.X16Debugger\X16D\bin\Release\net10.0\TemplateEngine' -type directory -force
+          copy-item 'BitMagic.TemplateEngine\BitMagic.TemplateEngine.Runner\bin\Release\net10.0\*.*' -Destination 'BitMagic.X16Debugger\X16D\bin\Release\net10.0\TemplateEngine' -Recurse -Force
+
+      - name: Build X16M
+        run: dotnet build 'BitMagic.X16MCP/X16M/X16M.csproj' /p:configuration=Release /p:Version=${{ needs.version.outputs.nuget-version }} --nologo
+
+      # Bundles the just-built Debugger next to X16M (under x16d/) so X16M finds it with no
+      # configuration needed - see X16M's Program.cs connection resolution order.
+      - name: Bundle X16D into X16M
+        run: |
+          new-item 'BitMagic.X16MCP\X16M\bin\Release\net10.0\x16d' -type directory -force
+          copy-item 'BitMagic.X16Debugger\X16D\bin\Release\net10.0\*' -Destination 'BitMagic.X16MCP\X16M\bin\Release\net10.0\x16d' -Recurse -Force
 
       - name: Create Version File
         run: |
-          echo "${{ github.sha }}" > BitMagic.X16Emulator/X16E/bin/Release/net6.0/version.txt
-          echo "${{ github.sha }}" > BitMagic.X16Debugger/X16D/bin/Release/net6.0/version.txt
-
-      - name: Save Core Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: EmulatorCore
-          path: BitMagic.X16Emulator\X16Emulator\EmulatorCore\x64\Release\core.obj
+          echo "${{ github.sha }}" > BitMagic.X16Emulator/X16E/bin/Release/net10.0/version.txt
+          echo "${{ github.sha }}" > BitMagic.X16Debugger/X16D/bin/Release/net10.0/version.txt
+          echo "${{ github.sha }}" > BitMagic.X16MCP/X16M/bin/Release/net10.0/version.txt
 
       - name: Archive Emulator
         uses: thedoctor0/zip-release@0.7.1
         with:
           type: 'zip'
           filename: 'BitMagic-TheEmulator.Windows.zip'
-          directory: BitMagic.X16Emulator/X16E/bin/Release/net6.0
+          directory: BitMagic.X16Emulator/X16E/bin/Release/net10.0
 
       - name: Archive Debugger
         uses: thedoctor0/zip-release@0.7.1
         with:
           type: 'zip'
           filename: 'BitMagic-TheDebugger.Windows.zip'
-          directory: BitMagic.X16Debugger/X16D/bin/Release/net6.0
+          directory: BitMagic.X16Debugger/X16D/bin/Release/net10.0
 
-      - name: Setup VS Dev
-        uses: seanmiddleditch/gha-setup-vsdevenv@v4
+      - name: Archive X16M
+        uses: thedoctor0/zip-release@0.7.1
+        with:
+          type: 'zip'
+          filename: 'BitMagic-TheMCP.Windows.zip'
+          directory: BitMagic.X16MCP/X16M/bin/Release/net10.0
+
+      # - name: Setup VS Dev
+      #   uses: seanmiddleditch/gha-setup-vsdevenv@v5
 
       # - name: Build MSI
       #   working-directory: BitMagic.X16Emulator
@@ -79,29 +183,46 @@ jobs:
       #     path: BitMagic.X16Emulator\X16ESetup\Release\X16ESetup.msi
 
       - name: Save Emulator Artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7.0.1
         with:
           name: BitMagic-TheEmulator
-          path: BitMagic.X16Emulator/X16E/bin/Release/net6.0/BitMagic-TheEmulator.Windows.zip
+          path: BitMagic.X16Emulator/X16E/bin/Release/net10.0/BitMagic-TheEmulator.Windows.zip
 
       - name: Save Debugger Artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7.0.1
         with:
           name: BitMagic-TheDebugger
-          path: BitMagic.X16Debugger/X16D/bin/Release/net6.0/BitMagic-TheDebugger.Windows.zip
+          path: BitMagic.X16Debugger/X16D/bin/Release/net10.0/BitMagic-TheDebugger.Windows.zip
+
+      - name: Save X16M Artifacts
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: BitMagic-TheMCP
+          path: BitMagic.X16MCP/X16M/bin/Release/net10.0/BitMagic-TheMCP.Windows.zip
 
   build-linux:
-    needs: build-windows
-    runs-on: ubuntu-22.04
+    needs: [build-core, version]
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v7.0.1
         with:
           submodules: recursive
+          fetch-depth: 0
+
+      # 8.0 runtime is needed by the ZiModem vendoring tool (tools/Vendoring targets
+      # net8.0, run by the CMake build below); 10.0 keeps the C# project builds on the
+      # same SDK the runner image already uses.
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v6.0.0
+        with:
+          dotnet-version: |
+            8.0.x
+            10.0.x
 
       - name: Copy artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8.0.1
         with:
           name: EmulatorCore
           path: BitMagic.X16Emulator/X16Emulator/EmulatorCoreLinux
@@ -109,6 +230,8 @@ jobs:
       - name: Build Core Wrapper
         working-directory: BitMagic.X16Emulator/X16Emulator/EmulatorCoreLinux
         run: |
+          ls -l
+          md5sum core.obj
           chmod +x build.sh
           ./build.sh
           ls -l
@@ -118,32 +241,110 @@ jobs:
           mkdir -p BitMagic.X16Emulator/X16Emulator/EmulatorCore/x64/Release
           cp BitMagic.X16Emulator/X16Emulator/EmulatorCoreLinux/EmulatorCore.so BitMagic.X16Emulator/X16Emulator/EmulatorCore/x64/Release/.
 
+      # The Linux core is a prebuilt core.obj linked by build.sh, so unlike the Windows
+      # job (where the EmulatorCore.vcxproj build triggers this) nothing has built the
+      # ZiModem host .so yet. BitMagic.X16Emulator.csproj <Content>-copies
+      # build/native/bin/libzimodem_host.so, so it must exist before "Build Debugger".
+      # cmake / gcc / make ship on the ubuntu-24.04 image.
+      #
+      # ZIMODEM_HOST_MSABI=ON: the emulator core calls this .so from hand-written x64 MASM
+      # that uses the Windows calling convention on every platform, so this dedicated copy
+      # is compiled with __attribute__((ms_abi)) on its ABI boundary. It forbids building
+      # the (SysV-convention) test suites, hence tests OFF.
+      - name: Build ZiModem Host
+        working-directory: External/BitMagic.ZiModem
+        run: |
+          cmake -S native -B build/native -DZIMODEM_HOST_MSABI=ON -DZIMODEM_BUILD_TESTS=OFF
+          cmake --build build/native --target zimodem_host -j"$(nproc)"
+          ls -l build/native/bin
+
       - name: Build Debugger
-        run: dotnet build 'BitMagic.X16Debugger/X16D/X16D.csproj' /p:configuration=Release --nologo
+        run: dotnet build 'BitMagic.X16Debugger/X16D/X16D.csproj' /p:configuration=Release /p:Version=${{ needs.version.outputs.nuget-version }} --nologo
 
       - name: Build TemplateRunner
         run: dotnet build 'BitMagic.TemplateEngine/BitMagic.TemplateEngine.Runner' /p:configuration=Release --nologo
 
       - name: Copy TemplateRunner to Debugger
         run: |
-          mkdir BitMagic.X16Debugger/X16D/bin/Release/net6.0/TemplateEngine
-          cp -R -v BitMagic.TemplateEngine/BitMagic.TemplateEngine.Runner/bin/Release/net6.0/* BitMagic.X16Debugger/X16D/bin/Release/net6.0/TemplateEngine
+          mkdir BitMagic.X16Debugger/X16D/bin/Release/net10.0/TemplateEngine
+          cp -R -v BitMagic.TemplateEngine/BitMagic.TemplateEngine.Runner/bin/Release/net10.0/* BitMagic.X16Debugger/X16D/bin/Release/net10.0/TemplateEngine
 
       - name: Copy Wrapper
         run: |
-          cp BitMagic.X16Emulator/X16Emulator/EmulatorCoreLinux/EmulatorCore.so BitMagic.X16Debugger/X16D/bin/Release/net6.0/.
+          cp BitMagic.X16Emulator/X16Emulator/EmulatorCoreLinux/EmulatorCore.so BitMagic.X16Debugger/X16D/bin/Release/net10.0/.
+
+      - name: Build X16M
+        run: dotnet build 'BitMagic.X16MCP/X16M/X16M.csproj' /p:configuration=Release /p:Version=${{ needs.version.outputs.nuget-version }} --nologo
+
+      # Bundles the just-built Debugger next to X16M (under x16d/) so X16M finds it with no
+      # configuration needed - see X16M's Program.cs connection resolution order.
+      - name: Bundle X16D into X16M
+        run: |
+          mkdir -p BitMagic.X16MCP/X16M/bin/Release/net10.0/x16d
+          cp -R BitMagic.X16Debugger/X16D/bin/Release/net10.0/* BitMagic.X16MCP/X16M/bin/Release/net10.0/x16d
+
+      - name: Build Emulator
+        run: dotnet build 'BitMagic.X16Emulator/X16E/X16E.csproj' /p:configuration=Release /p:Version=${{ needs.version.outputs.nuget-version }} --nologo
+
+      - name: Copy Wrapper to Emulator
+        run: |
+          cp BitMagic.X16Emulator/X16Emulator/EmulatorCoreLinux/EmulatorCore.so BitMagic.X16Emulator/X16E/bin/Release/net10.0/.
+
+      - name: Copy ROM Fetch Script
+        run: |
+          cp BitMagic.X16Emulator/X16E/fetch-rom.sh BitMagic.X16Emulator/X16E/bin/Release/net10.0/.
+          chmod +x BitMagic.X16Emulator/X16E/bin/Release/net10.0/fetch-rom.sh
+
+      - name: Copy Prerequisite Check
+        run: |
+          cp BitMagic.X16Emulator/X16E/check-prerequisites.sh BitMagic.X16Emulator/X16E/bin/Release/net10.0/.
+          chmod +x BitMagic.X16Emulator/X16E/bin/Release/net10.0/check-prerequisites.sh
 
       - name: Create Version File
         run: |
-          echo "${{ github.sha }}" > BitMagic.X16Debugger/X16D/bin/Release/net6.0/version.txt
-          echo "${{ github.sha }}" > version.txt
+          echo "${{ github.sha }}" > BitMagic.X16Debugger/X16D/bin/Release/net10.0/version.txt
+          echo "${{ github.sha }}" > BitMagic.X16Emulator/X16E/bin/Release/net10.0/version.txt
+          echo "${{ github.sha }}" > BitMagic.X16MCP/X16M/bin/Release/net10.0/version.txt
 
       - name: Archive Debugger
         uses: thedoctor0/zip-release@0.7.1
         with:
           type: 'tar'
           filename: '../../../../../BitMagic-TheDebugger.Linux.tar.gz'
-          directory: BitMagic.X16Debugger/X16D/bin/Release/net6.0
+          directory: BitMagic.X16Debugger/X16D/bin/Release/net10.0
+
+      - name: Archive Emulator
+        uses: thedoctor0/zip-release@0.7.1
+        with:
+          type: 'tar'
+          filename: '../../../../../BitMagic-TheEmulator.Linux.tar.gz'
+          directory: BitMagic.X16Emulator/X16E/bin/Release/net10.0
+
+      - name: Archive X16M
+        uses: thedoctor0/zip-release@0.7.1
+        with:
+          type: 'tar'
+          filename: '../../../../../BitMagic-TheMCP.Linux.tar.gz'
+          directory: BitMagic.X16MCP/X16M/bin/Release/net10.0
+
+      - name: Save Linux Artifacts
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: BitMagic-Linux
+          path: |
+            BitMagic-TheDebugger.Linux.tar.gz
+            BitMagic-TheEmulator.Linux.tar.gz
+            BitMagic-TheMCP.Linux.tar.gz
+
+  release:
+    needs: [build-windows, build-linux]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+
+    steps:
+      - name: Create Version File
+        run: echo "${{ github.sha }}" > version.txt
 
       # - name: Copy artifacts (Setup)
       #   uses: actions/download-artifact@v3
@@ -152,42 +353,115 @@ jobs:
       #     path: .
 
       - name: Copy artifacts (Debugger)
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8.0.1
         with:
           name: BitMagic-TheDebugger
           path: .
 
       - name: Copy artifacts (Emulator)
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8.0.1
         with:
           name: BitMagic-TheEmulator
           path: .
 
-# todo: replace these with https://github.com/softprops/action-gh-release
+      - name: Copy artifacts (X16M)
+        uses: actions/download-artifact@v8.0.1
+        with:
+          name: BitMagic-TheMCP
+          path: .
+
+      - name: Copy artifacts (Linux)
+        uses: actions/download-artifact@v8.0.1
+        with:
+          name: BitMagic-Linux
+          path: .
+
       - name: Create Github Release
-        uses: "marvinpinto/action-automatic-releases@latest"
+        uses: softprops/action-gh-release@v3.0.3
         if: github.ref == 'refs/heads/main'
         with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          token: "${{ secrets.GITHUB_TOKEN }}"
           prerelease: false
-          automatic_release_tag: "latest"
-          title: "Release Build"
+          tag_name: "latest"
+          target_commitish: "${{ github.sha }}"
+          name: "Release Build"
           files: |
             BitMagic-TheDebugger.Linux.tar.gz
+            BitMagic-TheEmulator.Linux.tar.gz
+            BitMagic-TheMCP.Linux.tar.gz
             BitMagic-TheEmulator.Windows.zip
             BitMagic-TheDebugger.Windows.zip
+            BitMagic-TheMCP.Windows.zip
             version.txt
 
       - name: Create Github Development Release
-        uses: "marvinpinto/action-automatic-releases@latest"
+        uses: softprops/action-gh-release@v3.0.3
         if: github.ref == 'refs/heads/develop'
         with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          token: "${{ secrets.GITHUB_TOKEN }}"
           prerelease: true
-          automatic_release_tag: "prerelease"
-          title: "Development Build"
+          tag_name: "prerelease"
+          target_commitish: "${{ github.sha }}"
+          name: "Development Build"
           files: |
             BitMagic-TheDebugger.Linux.tar.gz
+            BitMagic-TheEmulator.Linux.tar.gz
+            BitMagic-TheMCP.Linux.tar.gz
             BitMagic-TheEmulator.Windows.zip
             BitMagic-TheDebugger.Windows.zip
+            BitMagic-TheMCP.Windows.zip
             version.txt
+
+  nuget-publish:
+    needs: [version, build-windows, build-linux]
+    runs-on: ubuntu-24.04
+    permissions:
+      id-token: write # enable GitHub OIDC token issuance, needed for NuGet Trusted Publishing
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7.0.1
+        with:
+          submodules: recursive
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v6.0.0
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Copy artifacts (Debugger Windows)
+        uses: actions/download-artifact@v8.0.1
+        with:
+          name: BitMagic-TheDebugger
+          path: .
+
+      - name: Copy artifacts (Linux)
+        uses: actions/download-artifact@v8.0.1
+        with:
+          name: BitMagic-Linux
+          path: .
+
+      # X16M.csproj bundles these per-RID (see the comment above its RuntimeIdentifiers
+      # property) - staged one level above the project directory so the SDK's implicit
+      # Compile/Content globs don't sweep up X16D's own loose .cs library sources.
+      - name: Stage X16D bundles
+        run: |
+          mkdir -p BitMagic.X16MCP/x16d-win-x64
+          unzip -q BitMagic-TheDebugger.Windows.zip -d BitMagic.X16MCP/x16d-win-x64
+          mkdir -p BitMagic.X16MCP/x16d-linux-x64
+          tar -xzf BitMagic-TheDebugger.Linux.tar.gz -C BitMagic.X16MCP/x16d-linux-x64
+
+      - name: Pack X16M
+        run: dotnet pack 'BitMagic.X16MCP/X16M/X16M.csproj' -c Release -o nupkgs /p:Version=${{ needs.version.outputs.nuget-version }}
+
+      # Exchanges this job's GitHub OIDC token for a short-lived (1 hour) NuGet API key via
+      # the trusted-publishing policy configured on nuget.org for Yazwh0/BitMagic +
+      # build-test.yml -- no long-lived NUGET_API_KEY secret to store or rotate.
+      - name: NuGet login (OIDC -> temp API key)
+        uses: NuGet/login@v1
+        id: nuget-login
+        with:
+          user: ${{ secrets.NUGET_USER }}
+
+      - name: Push to NuGet
+        run: dotnet nuget push "nupkgs/*.nupkg" --api-key ${{ steps.nuget-login.outputs.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json --skip-duplicate

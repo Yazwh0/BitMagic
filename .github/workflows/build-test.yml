@@ -454,6 +454,31 @@ jobs:
       - name: Pack X16M
         run: dotnet pack 'BitMagic.X16MCP/X16M/X16M.csproj' -c Release -o nupkgs /p:Version=${{ needs.version.outputs.nuget-version }}
 
+      # X16E's managed code is platform neutral, the natives come in via BitMagic.X16Emulator.csproj's
+      # <Content> items, which pick up the other platform's builds when they exist. Stage both
+      # platforms' emulator core and ZiModem host where those items look for them.
+      - name: Copy artifacts (Core DLL)
+        uses: actions/download-artifact@v8.0.1
+        with:
+          name: EmulatorCoreDll
+          path: BitMagic.X16Emulator/X16Emulator/EmulatorCore/x64/Release
+
+      - name: Copy artifacts (ZiModem Host DLL)
+        uses: actions/download-artifact@v8.0.1
+        with:
+          name: ZiModemHostDll
+          path: External/BitMagic.ZiModem/build/native/bin
+
+      - name: Stage Linux natives
+        run: |
+          mkdir -p x16e-linux
+          tar -xzf BitMagic-TheEmulator.Linux.tar.gz -C x16e-linux
+          cp x16e-linux/EmulatorCore.so BitMagic.X16Emulator/X16Emulator/EmulatorCore/x64/Release/
+          cp x16e-linux/libzimodem_host.so External/BitMagic.ZiModem/build/native/bin/
+
+      - name: Pack X16E
+        run: dotnet pack 'BitMagic.X16Emulator/X16E/X16E.csproj' -c Release -o nupkgs /p:Version=${{ needs.version.outputs.nuget-version }}
+
       # Exchanges this job's GitHub OIDC token for a short-lived (1 hour) NuGet API key via
       # the trusted-publishing policy configured on nuget.org for Yazwh0/BitMagic +
       # build-test.yml -- no long-lived NUGET_API_KEY secret to store or rotate.

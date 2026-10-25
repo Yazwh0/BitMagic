@@ -1,0 +1,28 @@
+<Project>
+  <!--
+    The repo's actual LICENSE files are plain GPL-3.0 text (confirmed against every
+    submodule's LICENSE and GitHub's own "gpl-3.0" detection on the superproject),
+    not AGPL-3.0-or-later as this used to (ineffectually) claim. PackageLicenseFile,
+    not just a PackageLicenseExpression string, so the actual license text ships
+    inside the package rather than just an SPDX tag.
+
+    This lives in a .targets rather than Directory.Build.props because it's evaluated
+    after the project file, so it can see a project's own PackageLicenseExpression and
+    leave it alone. External/DiscUtils is an MIT fork and sets one; NuGet rejects a
+    package with both (NU5033).
+  -->
+  <PropertyGroup Condition="'$(PackageLicenseExpression)' == ''">
+    <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+  </PropertyGroup>
+
+  <!-- NuGet requires the packaged license file to have a .txt/.md extension (NU5030),
+       hence LICENSE.txt rather than the extensionless LICENSE some tools default to.
+       PackagePath="\" (matching the working README.md item in X16M.csproj) keeps the
+       source's own file name. An explicit rename via PackagePath (e.g. "LICENSE.txt" for
+       a source file just named LICENSE) nests the file under a same-named subfolder
+       instead, for a multi-RID pack like X16M's; confirmed by inspecting the generated
+       .nuspec. Renaming the source file itself sidesteps it entirely. -->
+  <ItemGroup Condition="'$(PackageLicenseExpression)' == ''">
+    <None Include="$(MSBuildThisFileDirectory)LICENSE.txt" Pack="true" PackagePath="\" />
+  </ItemGroup>
+</Project>

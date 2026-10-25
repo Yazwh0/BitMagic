@@ -479,6 +479,41 @@ jobs:
       - name: Pack X16E
         run: dotnet pack 'BitMagic.X16Emulator/X16E/X16E.csproj' -c Release -o nupkgs /p:Version=${{ needs.version.outputs.nuget-version }}
 
+      # The libraries, for building on top of BitMagic (eg unit testing X16 code). Each
+      # ProjectReference becomes a package dependency at this same version, so anything a
+      # library here references must be in this list too, or that package can't be restored.
+      # After "Stage Linux natives" so BitMagic.X16Emulator carries both platforms' natives.
+      # main only: develop pushes would add 22 prerelease packages to nuget.org each time.
+      - name: Pack libraries
+        if: github.ref == 'refs/heads/main'
+        run: |
+          for project in \
+            BitMagic.Libraries/BitMagic.Common/BitMagic.Common.csproj \
+            BitMagic.Libraries/BitMagic.Common.Address/BitMagic.Common.Address.csproj \
+            BitMagic.X16Compiler/BitMagic.Cpu/BitMagic.Cpu.csproj \
+            BitMagic.X16Compiler/BitMagic.Compiler.Cpu/BitMagic.Compiler.Cpu.csproj \
+            BitMagic.X16Compiler/BitMagic.Machines/BitMagic.Machines.csproj \
+            BitMagic.X16Compiler/BitMagic.Compiler/BitMagic.Compiler.csproj \
+            BitMagic.X16Compiler/BitMagic.Decompiler/BitMagic.Decompiler.csproj \
+            External/DiscUtils/Library/DiscUtils.Streams/BitMagic.DiscUtils.Streams.csproj \
+            External/DiscUtils/Library/DiscUtils.Core/BitMagic.DiscUtils.Core.csproj \
+            External/DiscUtils/Library/DiscUtils.Fat/BitMagic.DiscUtils.Fat.csproj \
+            External/DiscUtils/Library/DiscUtils.Vdi/BitMagic.DiscUtils.Vdi.csproj \
+            External/DiscUtils/Library/DiscUtils.Vhd/BitMagic.DiscUtils.Vhd.csproj \
+            BitMagic.X16Debugger/BitMagic.ImageHelper/BitMagic.ImageHelper.csproj \
+            BitMagic.TemplateEngine/Bitmagic.TemplateEngine/BitMagic.TemplateEngine.csproj \
+            BitMagic.TemplateEngine/BitMagic.TemplateEngine.Objects/BitMagic.TemplateEngine.Objects.csproj \
+            BitMagic.TemplateEngine/BitMagic.TemplateEngine.Compiler/BitMagic.TemplateEngine.Compiler.csproj \
+            BitMagic.TemplateEngine/BitMagic.TemplateEngine.X16/BitMagic.TemplateEngine.X16.csproj \
+            BitMagic.TemplateEngine/BitMagic.TemplateEngine.Runner/BitMagic.TemplateEngine.Runner.csproj \
+            BitMagic.X16Emulator/BitMagic.X16Emulator/BitMagic.X16Emulator.csproj \
+            BitMagic.X16Emulator/BitMagic.X16Emulator.Display/BitMagic.X16Emulator.Display.csproj \
+            BitMagic.X16Emulator/BitMagic.X16Emulator.Serializer/BitMagic.X16Emulator.Serializer.csproj \
+            BitMagic.X16Emulator/BitMagic.X16Emulator.TestHelper/BitMagic.X16Emulator.TestHelper.csproj
+          do
+            dotnet pack "$project" -c Release -o nupkgs /p:Version=${{ needs.version.outputs.nuget-version }}
+          done
+
       # Exchanges this job's GitHub OIDC token for a short-lived (1 hour) NuGet API key via
       # the trusted-publishing policy configured on nuget.org for Yazwh0/BitMagic +
       # build-test.yml -- no long-lived NUGET_API_KEY secret to store or rotate.

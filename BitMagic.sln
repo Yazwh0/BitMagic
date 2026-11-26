@@ -101,7 +101,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "X16KernelTokenGenerator", "
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ZiModem", "ZiModem", "{EA9A9461-65C5-4A08-AC88-D691CA7E6D96}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZiModem.Net", "External\BitMagic.ZiModem\managed\ZiModem.Net\ZiModem.Net.csproj", "{169D0060-163E-95B7-FD6B-8E961F82C176}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BitMagic.ZiModem.Net", "External\BitMagic.ZiModem\managed\ZiModem.Net\BitMagic.ZiModem.Net.csproj", "{169D0060-163E-95B7-FD6B-8E961F82C176}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ZiModemHost", "External\BitMagic.ZiModem\native\ZiModemHost.vcxproj", "{7E3EFF57-92D4-4994-8681-7D99B3F5A5A1}"
 EndProject

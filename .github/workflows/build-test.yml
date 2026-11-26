@@ -483,7 +483,7 @@ jobs:
       # ProjectReference becomes a package dependency at this same version, so anything a
       # library here references must be in this list too, or that package can't be restored.
       # After "Stage Linux natives" so BitMagic.X16Emulator carries both platforms' natives.
-      # main only: develop pushes would add 22 prerelease packages to nuget.org each time.
+      # main only: develop pushes would add 24 prerelease packages to nuget.org each time.
       - name: Pack libraries
         if: github.ref == 'refs/heads/main'
         run: |
@@ -509,10 +509,36 @@ jobs:
             BitMagic.X16Emulator/BitMagic.X16Emulator/BitMagic.X16Emulator.csproj \
             BitMagic.X16Emulator/BitMagic.X16Emulator.Display/BitMagic.X16Emulator.Display.csproj \
             BitMagic.X16Emulator/BitMagic.X16Emulator.Serializer/BitMagic.X16Emulator.Serializer.csproj \
-            BitMagic.X16Emulator/BitMagic.X16Emulator.TestHelper/BitMagic.X16Emulator.TestHelper.csproj
+            BitMagic.X16Emulator/BitMagic.X16Emulator.TestHelper/BitMagic.X16Emulator.TestHelper.csproj \
+            BitMagic.X16Debugger/BitMagic.Cc65Lib/BitMagic.Cc65Lib.csproj \
+            BitMagic.X16Debugger/BitMagic.X16Debugger/BitMagic.X16Debugger.csproj
           do
             dotnet pack "$project" -c Release -o nupkgs /p:Version=${{ needs.version.outputs.nuget-version }}
           done
+
+      # The libzimodem_host.so staged above is the ms_abi build for the emulator core, which
+      # BitMagic.ZiModem.Net's P/Invokes can't call. Build a normal SysV one into
+      # build/native-linux/bin, which its csproj prefers. The 8.0 runtime is for the
+      # vendoring tool the CMake build runs.
+      - name: Setup .NET 8 (ZiModem vendoring)
+        if: github.ref == 'refs/heads/main'
+        uses: actions/setup-dotnet@v6.0.0
+        with:
+          dotnet-version: |
+            8.0.x
+            10.0.x
+
+      - name: Build ZiModem Host (SysV)
+        if: github.ref == 'refs/heads/main'
+        working-directory: External/BitMagic.ZiModem
+        run: |
+          cmake -S native -B build/native-linux -DZIMODEM_BUILD_TESTS=OFF
+          cmake --build build/native-linux --target zimodem_host -j"$(nproc)"
+          ls -l build/native-linux/bin
+
+      - name: Pack ZiModem.Net
+        if: github.ref == 'refs/heads/main'
+        run: dotnet pack 'External/BitMagic.ZiModem/managed/ZiModem.Net/BitMagic.ZiModem.Net.csproj' -c Release -o nupkgs /p:Version=${{ needs.version.outputs.nuget-version }}
 
       # Exchanges this job's GitHub OIDC token for a short-lived (1 hour) NuGet API key via
       # the trusted-publishing policy configured on nuget.org for Yazwh0/BitMagic +
